@@ -106,10 +106,36 @@
             z-index: 1;
         }
         .object-image {
-            max-width: 200px;
-            max-height: 200px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 10px rgba(59, 130, 246, 0.5));
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.7),
+                        inset 0 0 10px rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .object-image::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                to bottom right,
+                transparent,
+                transparent,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent,
+                transparent,
+                transparent
+            );
+            transform: rotate(30deg);
+            animation: shine 3s infinite;
         }
         .progress-bar {
             height: 10px;
@@ -215,28 +241,28 @@
     <audio id="tone" src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3" preload="auto"></audio>
 
     <script>
-        // Object database
+        // Object database with specific search terms for better images
         const objects = [
-            { name: "Apple", emoji: "" },
-            { name: "Ball", emoji: "⚽" },
-            { name: "Key", emoji: "🔑" },
-            { name: "Clock", emoji: "⏰" },
-            { name: "Pen", emoji: "🖊️" },
-            { name: "Spoon", emoji: "🥄" },
-            { name: "Book", emoji: "📚" },
-            { name: "Car", emoji: "🚗" },
-            { name: "Tree", emoji: "🌳" },
-            { name: "House", emoji: "🏠" },
-            { name: "Cat", emoji: "🐱" },
-            { name: "Sun", emoji: "☀️" },
-            { name: "Hat", emoji: "🧢" },
-            { name: "Shoe", emoji: "👟" },
-            { name: "Glasses", emoji: "👓" },
-            { name: "Phone", emoji: "📱" },
-            { name: "Bicycle", emoji: "🚲" },
-            { name: "Umbrella", emoji: "☂️" },
-            { name: "Pizza", emoji: "🍕" },
-            { name: "Guitar", emoji: "🎸" }
+            { name: "Red Apple", search: "red+apple" },
+            { name: "Football", search: "football" },
+            { name: "Golden Key", search: "gold+key" },
+            { name: "Alarm Clock", search: "alarm+clock" },
+            { name: "Fountain Pen", search: "fountain+pen" },
+            { name: "Silver Spoon", search: "silver+spoon" },
+            { name: "Hardcover Book", search: "hardcover+book" },
+            { name: "Sports Car", search: "sports+car" },
+            { name: "Oak Tree", search: "oak+tree" },
+            { name: "Modern House", search: "modern+house" },
+            { name: "Tabby Cat", search: "tabby+cat" },
+            { name: "Sunset", search: "sunset" },
+            { name: "Baseball Cap", search: "baseball+cap" },
+            { name: "Running Shoe", search: "running+shoe" },
+            { name: "Sunglasses", search: "sunglasses" },
+            { name: "Smartphone", search: "smartphone" },
+            { name: "Mountain Bike", search: "mountain+bike" },
+            { name: "Colorful Umbrella", search: "colorful+umbrella" },
+            { name: "Pepperoni Pizza", search: "pepperoni+pizza" },
+            { name: "Electric Guitar", search: "electric+guitar" }
         ];
 
         // DOM elements
@@ -281,7 +307,6 @@
             testScreen.classList.remove('hidden');
             resultsScreen.classList.add('hidden');
             controls.classList.add('hidden');
-            startTimer();
             
             // Start showing objects
             showNextObject(interval, useSound);
@@ -305,7 +330,7 @@
             const newObject = document.createElement('div');
             newObject.className = 'object-display active';
             newObject.innerHTML = `
-                <img src="https://source.unsplash.com/random/300x300/?${encodeURIComponent(currentObject.name)}" 
+                <img src="https://source.unsplash.com/300x300/?${currentObject.search}" 
                      alt="${currentObject.name}" 
                      class="object-image mb-4">
                 <div class="text-2xl font-bold text-blue-400">
@@ -343,14 +368,17 @@
             resultsList.innerHTML = '';
             currentTestObjects.forEach((obj, index) => {
                 const item = document.createElement('div');
-                item.className = 'bg-gray-800/70 hover:bg-gray-700/80 p-4 rounded-xl flex items-center cursor-pointer transition-all border border-white/5 hover:border-white/20';
+                item.className = 'bg-gray-800/70 hover:bg-gray-700/80 p-4 rounded-xl cursor-pointer transition-all relative overflow-hidden group';
                 item.innerHTML = `
-                    <img src="https://source.unsplash.com/random/100x100/?${encodeURIComponent(obj.name)}" 
-                         alt="${obj.name}" 
-                         class="w-12 h-12 object-cover rounded-full mr-3">
-                    <div>
-                        <div class="font-bold text-blue-400">${index + 1}. ${obj.name}</div>
+                    <div class="relative">
+                        <img src="https://source.unsplash.com/random/300x300/?${encodeURIComponent(obj.name)}" 
+                             alt="${obj.name}" 
+                             class="w-full aspect-square object-cover rounded-lg mb-3 border-2 border-transparent group-hover:border-blue-400 transition-all duration-300">
+                        <div class="absolute inset-0 rounded-lg pointer-events-none overflow-hidden">
+                            <div class="absolute inset-0 bg-gradient-to-br from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        </div>
                     </div>
+                    <div class="font-bold text-blue-400 text-center">${index + 1}. ${obj.name}</div>
                 `;
                 resultsList.appendChild(item);
             });
@@ -393,7 +421,10 @@
             document.getElementById('rules-btn').addEventListener('click', () => {
                 rulesModal.classList.remove('hidden');
             });
-            showOrderBtn.addEventListener('click', showResults);
+            showOrderBtn.addEventListener('click', () => {
+                showResults();
+                startTimer();
+            });
             restartBtn.addEventListener('click', () => {
                 resultsScreen.classList.add('hidden');
                 setupScreen.classList.remove('hidden');
