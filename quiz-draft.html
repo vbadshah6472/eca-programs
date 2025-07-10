@@ -753,8 +753,23 @@
 
         // Reveal answer
         function revealAnswer() {
-            answerText.classList.remove('hidden');
-            answerText.classList.add('fade-in');
+            if (currentRound === 'rapidFire' && currentQuestion) {
+                const questions = quizData.rapidFire[currentQuestion - 1].questions;
+                let summaryHtml = '<div class="text-left"><h3 class="text-xl font-semibold mb-4">Rapid Fire Round Summary:</h3>';
+                questions.forEach((q, i) => {
+                    summaryHtml += `
+                        <div class="mb-6 p-4 bg-gray-800/50 rounded-lg fade-in">
+                            <p class="mb-2"><strong>Question ${i+1}:</strong> ${q.question}</p>
+                            <p class="answer-text"><strong>Answer:</strong> ${q.answer}</p>
+                        </div>`;
+                });
+                summaryHtml += '</div>';
+                
+                questionText.innerHTML = summaryHtml;
+            } else {
+                answerText.classList.remove('hidden');
+                answerText.classList.add('fade-in');
+            }
             resetTimer(); // Will reset to 30 seconds
             startTimer();
         }
@@ -776,6 +791,7 @@
                     clearInterval(timerInterval);
                     isTimerRunning = false;
                     timerDisplay.classList.remove('timer-active');
+                    timerDisplay.dispatchEvent(new Event('timerExpired'));
                 }
             }, 1000);
         }
@@ -927,35 +943,113 @@
         function startRapidFire(setNumber) {
             const questions = quizData.rapidFire[setNumber - 1].questions;
             let currentQIndex = 0;
+            let revealedAnswers = [];
             
-            // Set timer to 10 seconds per question
-            timerValue = 10;
-            timerDisplay.textContent = timerValue;
+            // Create navigation controls
+            const navControls = document.createElement('div');
+            navControls.className = 'flex justify-center gap-4 mt-6';
+            navControls.innerHTML = `
+                <button id="prev-btn" class="bg-gray-600/50 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-all hidden">
+                    <i class="fas fa-arrow-left mr-2"></i> Previous
+                </button>
+                <button id="reveal-btn" class="bg-green-600/50 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-all">
+                    Reveal Answer <i class="fas fa-eye ml-2"></i>
+                </button>
+                <button id="next-btn" class="bg-blue-600/50 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-all">
+                    Next <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+                <button id="end-btn" class="bg-red-600/50 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all hidden">
+                    Finish Round
+                </button>
+            `;
             
-            const showNextQuestion = () => {
-                if (currentQIndex < questions.length) {
-                    questionText.textContent = questions[currentQIndex].question;
-                    answerText.textContent = questions[currentQIndex].answer;
-                    answerText.classList.add('hidden');
+            // Replace default buttons with rapid fire controls
+            const oldControls = document.querySelector('.question-box .flex.justify-center');
+            oldControls.replaceWith(navControls);
+            
+            const showQuestion = (index) => {
+                if (index >= 0 && index < questions.length) {
+                    const q = questions[index];
+                    questionText.textContent = q.question;
                     
-                    // Reset timer for each question
-                    timerValue = 10;
-                    timerDisplay.textContent = timerValue;
+                    // Show answer if it was already revealed
+                    if (revealedAnswers.includes(index)) {
+                        answerText.textContent = q.answer;
+                        answerText.classList.remove('hidden');
+                    } else {
+                        answerText.textContent = '';
+                        answerText.classList.add('hidden');
+                    }
                     
-                    currentQIndex++;
+                    // Update nav buttons
+                    document.getElementById('prev-btn').classList.toggle('hidden', index === 0);
+                    document.getElementById('next-btn').classList.toggle('hidden', index === questions.length - 1);
+                    document.getElementById('end-btn').classList.toggle('hidden', index !== questions.length - 1);
+                    
+                    // Reset timer for each question (10 seconds)
+                    resetTimer(10);
                     startTimer();
-                } else {
-                    // End of rapid fire
-                    pauseTimer();
-                    questionText.textContent = `Rapid Fire Set ${setNumber} completed!`;
-                    answerText.textContent = '';
                 }
             };
             
-            // Start with first question
-            setTimeout(() => {
-                showNextQuestion();
-            }, 2000);
+            // Reveal current answer
+            document.getElementById('reveal-btn').addEventListener('click', () => {
+                if (!revealedAnswers.includes(currentQIndex)) {
+                    revealedAnswers.push(currentQIndex);
+                    answerText.textContent = questions[currentQIndex].answer;
+                    answerText.classList.remove('hidden');
+                    answerText.classList.add('fade-in');
+                }
+            });
+            
+            // Timer expiration handler
+            const onTimerExpire = () => {
+                if (currentQIndex < questions.length - 1) {
+                    currentQIndex++;
+                    showQuestion(currentQIndex);
+                } else {
+                    // Last question expired
+                    pauseTimer();
+                    showSummary();
+                }
+            };
+            
+          
+                           
+                    
+                   
+          
+            
+            // Event listeners
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                pauseTimer();
+                currentQIndex--;
+                showQuestion(currentQIndex);
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', () => {
+                pauseTimer();
+                currentQIndex++;
+                showQuestion(currentQIndex);
+            });
+            
+            document.getElementById('end-btn').addEventListener('click', () => {
+                pauseTimer();
+                hideQuestion();
+            });
+            
+            // Show first question
+            showQuestion(0);
+            
+            // Override timer expiration behavior for rapid fire
+            timerDisplay.addEventListener('timerExpired', onTimerExpire);
+        }
+        
+        // Modified timer reset function
+        function resetTimer(seconds = 30) {
+            pauseTimer();
+            timerValue = seconds;
+            timerDisplay.textContent = timerValue;
         }
 
         // Initialize the app when DOM is loaded
