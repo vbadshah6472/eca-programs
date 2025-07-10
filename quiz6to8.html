@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interhouse Quiz Contest - Shree Tikuligadh Secondary School</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-red: #E63946;
+            --primary-yellow: #FFD166;
+            --primary-green: #06D6A0;
+            --primary-blue: #118AB2;
+            --dark-blue: #073B4C;
+            --bg-dark: #1a1a2e;
+            --card-dark: #16213e;
+            --text-light: #e6e6e6;
+            --text-muted: #b8b8b8;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            padding: 1.5rem;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(8px);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+            transition: all 0.3s ease;
+            padding: 1rem;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .timer-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 0 20px rgba(0, 0, 0, 0.3),
+                inset 0 0 10px rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .timer-circle::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                currentColor 0%,
+                transparent calc(0% + 2px)
+            );
+            opacity: 0.3;
+            animation: rotate 60s linear infinite;
+        }
+
+        @keyframes rotate {
+            to { transform: rotate(360deg); }
+        }
+        
+        .timer-active {
+            animation: pulse 1s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from {
+                box-shadow: 0 0 10px rgba(231, 57, 70, 0.5);
+            }
+            to {
+                box-shadow: 0 0 20px rgba(231, 57, 70, 0.8);
+            }
+        }
+
+        @keyframes border-glow {
+            0% {
+                border-color: rgba(59, 130, 246, 0.2);
+                box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+            }
+            50% {
+                border-color: rgba(59, 130, 246, 0.6);
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.6);
+            }
+            100% {
+                border-color: rgba(59, 130, 246, 0.2);
+                box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+            }
+        }
+
+        .animate-border-glow {
+            animation: border-glow 3s ease-in-out infinite;
+        }
+        
+        .question-box {
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-bottom: 0;
+            padding: 2rem;
+        }
+
+        .question-text {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 2rem;
+            line-height: 1.3;
+            max-width: 800px;
+        }
+
+        .answer-text {
+            font-size: 1.8rem;
+            font-weight: 500;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid rgba(59, 130, 246, 0.5);
+        }
+        .left-panel {
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+        
+        .number-grid {
+            display: grid;
+            gap: 2px;
+        }
+        
+        .number-btn {
+            aspect-ratio: 1/1;
+            min-width: 6px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .number-btn:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .number-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+        }
+        
+        .available {
+            background: linear-gradient(145deg, #2d3748, #1e293b);
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+        }
+        
+        .available:hover {
+            background: linear-gradient(145deg, #334155, #1e293b);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .used {
+            background: linear-gradient(145deg, #4c1d1d, #3f1a1a);
+            color: #fecaca;
+            border: 1px solid #7f1d1d;
+            opacity: 0.7;
+        }
+        
+        .selected {
+            background: linear-gradient(145deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+            transform: scale(1.1);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .house-card {
+            border-radius: 18px;
+            transition: all 0.3s ease;
+        }
+        
+        .house-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .house-red {
+            background-color: var(--primary-red);
+        }
+        
+        .house-yellow {
+            background-color: var(--primary-yellow);
+        }
+        
+        .house-green {
+            background-color: var(--primary-green);
+        }
+        
+        .house-blue {
+            background-color: var(--primary-blue);
+        }
+        
+        .btn {
+            transition: all 0.2s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .btn {
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                120deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.05) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .btn:hover::after {
+            transform: translateX(100%);
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .section-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            letter-spacing: -0.25px;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            color: #f3f4f6;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 50%;
+            height: 3px;
+            background: #60a5fa;
+            border-radius: 3px;
+            box-shadow: 0 0 8px rgba(96, 165, 250, 0.5);
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 1200px) {
+            .absolute.top-0.right-0 {
+                position: static;
+                max-width: 100%;
+                margin: 0;
+            }
+            
+            .glass-panel.p-4 {
+                margin: 0 auto;
+                width: 90%;
+            }
+            
+            .timer-circle {
+                width: 100px;
+                height: 100px;
+                font-size: 2.5rem;
+            }
+            
+            #scoreboard {
+                grid-template-columns: repeat(2, 1fr);
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .number-grid {
+                grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            }
+            
+            .timer-circle {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+            
+            .timer-controls button {
+                padding: 0.75rem;
+            }
+            
+            #scoreboard {
+                grid-template-columns: 1fr;
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .number-grid {
+                grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            }
+            
+            .timer-circle {
+                width: 70px;
+                height: 70px;
+                font-size: 1.75rem;
+            }
+            
+            .timer-controls button {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-800 p-0 m-0 h-screen overflow-hidden">
+    <div class="max-w-[1400px] h-[95vh] mx-auto my-2 p-4 rounded-xl border-4 border-white/20 relative overflow-hidden">
+        <div class="absolute inset-0 rounded-xl border-4 border-transparent animate-border-glow pointer-events-none"></div>
+        <!-- Header Section -->
+        <header class="glass-panel mb-6 p-6 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-2 font-display">SHREE TIKULIGADH SECONDARY SCHOOL</h1>
+            <p class="text-xl text-indigo-200">Interhouse Quiz Contest (6-8)</p>
+            <p class="text-sm text-gray-400 mt-1">Tilottama-14, Rupandehi (Estd. 2018)</p>
+        </header>
+
+        <!-- Main layout with timer at top-right -->
+        <div class="relative">
+            <!-- Main content layout -->
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Left Column - Question Grid (smaller) -->
+                <div class="lg:w-1/6 h-full flex flex-col">
+                    <div class="glass-panel p-6 flex-1 overflow-y-auto">
+                        <h2 class="section-title text-lg mb-4">Select Round</h2>
+                        <div class="flex flex-wrap gap-2 mb-6">
+                            <button id="round-general" class="btn bg-blue-600/50 hover:bg-blue-600 text-white px-4 py-2 rounded-lg active:scale-95 transition-all">
+                                The General Round
+                            </button>
+                            <button id="round-audio" class="btn bg-purple-600/50 hover:bg-purple-600 text-white px-4 py-2 rounded-lg active:scale-95 transition-all">
+                                Audio-Visual Round
+                            </button>
+                            <button id="round-rapid" class="btn bg-red-600/50 hover:bg-red-600 text-white px-4 py-2 rounded-lg active:scale-95 transition-all">
+                                Rapid Fire Round
+                            </button>
+                        </div>
+                        
+                        <h2 class="section-title text-lg mb-4">Question Grid</h2>
+                        <div id="question-grid" class="number-grid grid-cols-5 md:grid-cols-5 lg:grid-cols-5 gap-3">
+                            <!-- Numbers will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Middle Column - Question Display -->
+                <div class="flex-1 h-full overflow-y-auto px-4">
+                    <div id="welcome-screen" class="question-box glass-panel p-8 rounded-xl flex flex-col items-center justify-center text-center h-full mx-2">
+                        <div class="bg-indigo-900/30 p-6 rounded-full mb-6">
+                            <i class="fas fa-trophy text-4xl text-yellow-400"></i>
+                        </div>
+                        <h2 class="text-4xl font-bold text-white mb-4">Welcome to The Friday's Program -Interhouse Quiz</h2>
+                        <p class="text-gray-300 text-xl mb-6 max-w-md">The stage is set for an exciting journey across three thrilling rounds — General, Audio-Visual, and Rapid Fire. Select a question number to begin!</p>
+                        
+                        <div class="flex space-x-2">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full animate-bounce" style="animation-delay: 0s"></div>
+                            <div class="w-3 h-3 bg-green-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            <div class="w-3 h-3 bg-red-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
+                        </div>
+                    </div>
+
+                    <div id="question-display" class="question-box glass-panel rounded-xl hidden h-full mx-2">
+                        <h3 class="text-xl font-semibold text-indigo-400 mb-4" id="question-category">General Question</h3>
+                        <p class="question-text" id="question-text">Select a question from the grid to display it here.</p>
+                        <div id="question-media" class="mb-6 hidden">
+                            <!-- For audio/visual content -->
+                        </div>
+                        <p class="answer-text hidden" id="answer-text"></p>
+                        <div class="flex justify-center gap-4 mt-6">
+                            <button id="back-btn" class="bg-gray-600/50 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-all">
+                                <i class="fas fa-arrow-left mr-2"></i> Back
+                            </button>
+                            <button id="reveal-btn" class="bg-gradient-to-r from-green-500 to-blue-500 text-white px-6 py-3 rounded-lg hover:opacity-90 transition-all">
+                                Reveal Answer <i class="fas fa-eye ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Timer and Scoreboard -->
+                <div class="lg:w-96 h-full flex flex-col space-y-6">
+                    <!-- Timer -->
+                    <div class="glass-panel p-4 flex-1">
+                        <h2 class="section-title text-sm mb-3">Timer</h2>
+                        <div class="flex flex-col items-center">
+                            <div class="timer-circle bg-gray-800/90 border-4 border-red-500 text-red-500 font-bold text-4xl w-20 h-20 mb-3" id="timer">
+                                30
+                            </div>
+                            <div class="flex justify-center space-x-1">
+                                <button id="timer-play" class="bg-green-600 text-white p-1.5 rounded-full hover:bg-green-700">
+                                    <i class="fas fa-play text-xs"></i>
+                                </button>
+                                <button id="timer-pause" class="bg-yellow-600 text-white p-1.5 rounded-full hover:bg-yellow-700">
+                                    <i class="fas fa-pause text-xs"></i>
+                                </button>
+                                <button id="timer-reset" class="bg-gray-600 text-white p-1.5 rounded-full hover:bg-gray-700">
+                                    <i class="fas fa-redo text-xs"></i>
+                                </button>
+                                <button id="timer-pass" class="bg-blue-600 text-white p-1.5 rounded-full hover:bg-blue-700">
+                                    <i class="fas fa-forward text-xs"></i>
+                                </button>
+                            </div>
+                            <div class="flex justify-center space-x-1 mt-1.5">
+                                <button class="timer-preset bg-indigo-600 text-white px-2 py-0.5 rounded-full hover:bg-indigo-700 text-[0.65rem]" data-time="30">30s</button>
+                                <button class="timer-preset bg-indigo-600 text-white px-2 py-0.5 rounded-full hover:bg-indigo-700 text-[0.65rem]" data-time="20">20s</button>
+                                <button class="timer-preset bg-indigo-600 text-white px-2 py-0.5 rounded-full hover:bg-indigo-700 text-[0.65rem]" data-time="10">10s</button>
+                                <button class="timer-preset bg-indigo-600 text-white px-2 py-0.5 rounded-full hover:bg-indigo-700 text-[0.65rem]" data-time="5">5s</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Scoreboard -->
+                    <div class="glass-panel p-3 flex-1 overflow-y-auto">
+                        <h2 class="section-title text-sm mb-2">Scoreboard</h2>
+                        <div id="scoreboard" class="grid grid-cols-2 gap-1.5">
+                            <div class="col-span-full mb-1 text-center text-gray-400 text-[0.65rem]">Click +/- to update</div>
+                            <!-- House cards will be generated by JavaScript -->
+                        </div>
+                    </div>
+                    <!-- Question Display (full width below grid) -->
+                    <div id="question-display" class="question-box bg-gray-800 border border-gray-700 p-6 rounded-xl flex flex-col justify-between hidden mt-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-indigo-400 mb-2" id="question-category">General Question</h3>
+                            <p class="text-gray-200 text-xl mb-4 leading-relaxed" id="question-text">Select a question from the grid to display it here.</p>
+                            <div id="question-media" class="mb-4 hidden">
+                                <!-- For audio/visual content -->
+                            </div>
+                            <p class="text-gray-700 font-medium hidden" id="answer-text"></p>
+                        </div>
+                        <div class="flex justify-between mt-4">
+                            <button id="back-btn" class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600">
+                                <i class="fas fa-arrow-left mr-2"></i> Back
+                            </button>
+                            <button id="reveal-btn" class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600">
+                                Reveal Answer <i class="fas fa-eye ml-2"></i>
+                            </button>
+                        </div>
+                    </div>
+                  
+                      
+                    </div>
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // Quiz Data
+        const quizData = {
+            general: [
+                { question: "What is the minimum age for voting in Nepal?", answer: "18 yrs" },
+                { question: "What is the largest organ in the human body? ", answer: "skin" },
+                { question: "Which vitamin is provided by sunlight?", answer: "vitamin d" },
+                { question: "What is the process of changing water into vapor called??", answer: "Evaporation" },
+                { question: "If a clock shows 3:00, what is the angle between the hour and minute hand?", answer: "90" },
+                { question: "I am an odd number.
+Take away one letter, and I become even.
+What number am I?", answer: "23" },
+                { question: "Who was the first king of unified Nepal?", answer: "prithivi narayan shah" },
+                { question: "Who is known as the “Iron Man of Nepal”? ", answer: "B.P koirala" },
+                { question: "Which country won the 2024 ICC T20 Cricket World Cup ?", answer: "india" },
+                { question: "'What has to be broken before you can use it?", answer: "an egg" },
+                { question: "Who is the famous Nepali mountaineer who climbed Everest 24 times? ", answer: "kami rita sherpa" },
+                { question: "What is the longest river in the world??", answer: "Nile" },
+                { question: "Who was the first man to walk on the moon?", answer: "neil armstrong" },
+                { question: "If you multiply this number by any other number, the answer will always be the same. Which number is it??", answer: "zero" },
+                { question: "Which country has won the most FIFA World Cups?", answer: "brazil’" },
+                { question: "Which Nepali girl set the Guinness World Record for the longest dance marathon of 126 hours?", answer: "bandana nepal" },
+                { question: "In which city of India did the massive plane crash over the Medical Boys Hostel recently that took the life of more than 241 people?", answer: "ahmdabad" },
+                { question: "What has hands but can’t clap?", answer: "a clock" },
+                { question: "What word is spelled incorrectly in every single dictionary?", answer: "INCORRECTLY" },
+                { question: "Which two IPL teams have won the most IPL titles?", answer: "mi,csk" },
+                { question: "Who is the founder of biggest social media giant "Facebook?", answer: "mark Zuckerberg" },
+                { question: "which is the only cricketer of nepal who played the IPL?", answer: "Sandip lamichhane" },
+                { question: "when is national paddy day celebrate in nepal?", answer: "aasar,15" },
+                { question: "Who is known as “Captain Cool” in Indian cricket?", answer: "MS.dhoni" },
+                { question: "what is the fullform of WHO?", answer: "World Health Organation" },
+                { question: "the sum of all two digit number is:?", answer: "4905" },
+                { question: "What does “GPT” stand for in ChatGPT?", answer: "generative pre trained transformed" },
+                { question: "What was the last word of the pilot in the recent Ahmedabad plane crash?", answer: "mayday" }
+            ],
+            audioVisual: [
+                { question: "Play the national anthem of Nepal. What is its name?", answer: "Sayaun Thunga Phulka" },
+                { question: "Show the flag of Nepal. How many points does the moon have?", answer: "8" },
+                { question: "Play a tiger's roar. Which is the national animal of Nepal?", answer: "Cow" },
+                { question: "Show a picture of Lumbini. Why is it significant?", answer: "Birthplace of Buddha" },
+                { question: "Play a traditional Nepali instrument sound. Name the instrument.", answer: "Madal" },
+                { question: "Show a picture of Mount Everest. What is its height in meters?", answer: "8,848 meters" },
+                { question: "Play a folk song. Which ethnic group is it associated with?", answer: "Various possible answers" },
+                { question: "Show a picture of a rhododendron. What color is Nepal's national flower?", answer: "Red" }
+            ],
+            rapidFire: [
+                {
+                    questions: [
+                  { "question": "Which flower is known as the 'King of Flowers'?", "answer": "Rose" },
+  { "question": "What do you call a baby dog?", "answer": "Puppy" },
+  { "question": "How many wheels does a bicycle have?", "answer": "2" },
+  { "question": "Which season comes after winter?", "answer": "Spring" },
+  { "question": "What is the color of grass?", "answer": "Green" }    
+                      
+                               
+            
+                    ]
+                },
+                {
+                    questions: [
+{ "question": "What is the chemical symbol for Gold?", "answer": "Au" },
+  { "question": "Name the largest two digits number", "answer": "99" },
+  { "question": "How many players are there in a basketball team on the court?", "answer": "5" },
+  { "question": "What is the hardest natural substance on Earth?", "answer": "Diamond" },
+  { "question": "Which organ pumps blood through the body?", "answer": "Heart" }
+                },
+                {
+                    questions: [
+                   { "question": "What color is the sky on a clear day?", "answer": "Blue" },
+  { "question": "Which animal is known as the 'King of the Jungle'?", "answer": "Lion" },
+  { "question": "How many days are there in a week?", "answer": "7" },
+  { "question": "Which fruit is famous for keeping the doctor away if you eat one every day?", "answer": "Apple" },
+  { "question": "Which shape has three sides?", "answer": "Triangle" }
+                    ]
+                },
+                {
+                    questions: [
+                       { "question": "What do you call water when it falls from clouds?", "answer": "Rain" },
+  { "question": "Which bird is known for mimicking human speech?", "answer": "Parrot" },
+  { "question": "What is 10 minus 4?", "answer": "6" },
+  { "question": "How many legs does a spider have?", "answer": "8" },
+  { "question": "Which festival is celebrated with colors in Nepal and India?", "answer": "Holi" }
+                    ]
+                }
+            ]
+        };
+
+        // Houses Data
+        const houses = [
+            { name: "Red House", color: "red", score: 0 },
+            { name: "Yellow House", color: "yellow", score: 0 },
+            { name: "Green House", color: "green", score: 0 },
+            { name: "Blue House", color: "blue", score: 0 }
+        ];
+
+        // Game State
+        let currentRound = 'general';
+        let selectedNumber = null;
+        let currentQuestion = null;
+        let usedQuestions = {
+            general: [],
+            audioVisual: [],
+            rapidFire: []
+        };
+        let timerInterval = null;
+        let timerValue = 30;
+        const timerPresets = [30, 20, 10, 10]; // Timer sequence: 30s -> 20s -> 10s -> 10s
+        let currentTimerPresetIndex = 0;
+        let isTimerRunning = false;
+
+        // DOM Elements
+        const questionGrid = document.getElementById('question-grid');
+        const questionDisplay = document.getElementById('question-display');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const questionText = document.getElementById('question-text');
+        const answerText = document.getElementById('answer-text');
+        const questionCategory = document.getElementById('question-category');
+        const backBtn = document.getElementById('back-btn');
+        const revealBtn = document.getElementById('reveal-btn');
+        const timerDisplay = document.getElementById('timer');
+        const timerPlayBtn = document.getElementById('timer-play');
+        const timerPauseBtn = document.getElementById('timer-pause');
+        const timerPassBtn = document.getElementById('timer-pass');
+        const scoreboard = document.getElementById('scoreboard');
+        const roundGeneralBtn = document.getElementById('round-general');
+        const roundAudioBtn = document.getElementById('round-audio');
+        const roundRapidBtn = document.getElementById('round-rapid');
+
+        // Initialize the app
+        function init() {
+            renderQuestionGrid();
+            renderScoreboard();
+            setupEventListeners();
+        }
+
+        // Render question grid based on current round
+        function renderQuestionGrid() {
+            questionGrid.innerHTML = '';
+            const gridConfig = {
+                general: { count: 28, cols: 'grid-cols-7 md:grid-cols-10', prefix: 'Q' },
+                audioVisual: { count: 8, cols: 'grid-cols-4 md:grid-cols-5 lg:grid-cols-8', prefix: 'AV' },
+                rapidFire: { count: 4, cols: 'grid-cols-2 md:grid-cols-4', prefix: 'RF' }
+            };
+            
+            const { count, cols, prefix } = gridConfig[currentRound];
+            questionGrid.className = `number-grid grid-cols-7 gap-3`;
+            
+            for (let i = 1; i <= count; i++) {
+                const isUsed = usedQuestions[currentRound].includes(i);
+                const btn = document.createElement('button');
+                btn.className = `number-btn ${isUsed ? 'used' : 'available'}`;
+                btn.textContent = i;
+                btn.dataset.number = i;
+                
+                btn.addEventListener('click', () => {
+                    if (!isUsed) {
+                        resetTimer(); // Reset timer when switching questions
+                        showQuestion(i);
+                    }
+                });
+                
+                questionGrid.appendChild(btn);
+            }
+        }
+
+        // Show question
+        function showQuestion(number) {
+            // Reset previous selected number style
+            if (selectedNumber) {
+                const prevBtn = document.querySelector(`.number-btn[data-number="${selectedNumber}"]`);
+                if (prevBtn) prevBtn.classList.remove('selected');
+            }
+            
+            currentQuestion = number;
+            selectedNumber = number;
+            
+            // Highlight current number in red
+            const currentBtn = document.querySelector(`.number-btn[data-number="${number}"]`);
+            if (currentBtn) {
+                currentBtn.classList.add('selected');
+                currentBtn.style.backgroundColor = 'rgba(255, 0, 0, 0.3)';
+                currentBtn.style.borderColor = 'red';
+            }
+            
+            if (currentRound === 'rapidFire') {
+                // Handle rapid fire questions
+                questionCategory.textContent = 'Rapid Fire Question Set';
+                questionText.textContent = `Get ready for 5 rapid fire questions!`;
+                answerText.textContent = '';
+                answerText.classList.add('hidden');
+                
+                welcomeScreen.classList.add('hidden');
+                questionDisplay.classList.remove('hidden');
+                questionDisplay.classList.add('fade-in');
+                
+                // Start rapid fire sequence
+                startRapidFire(number);
+            } else {
+                // Handle normal questions
+                const questionData = quizData[currentRound][number - 1];
+                
+                questionText.textContent = questionData.question;
+                answerText.textContent = questionData.answer;
+                answerText.classList.add('hidden');
+                
+                questionCategory.textContent = 
+                    currentRound === 'general' ? 'General Question' :
+                    'Audio-Visual Question';
+                
+                welcomeScreen.classList.add('hidden');
+                questionDisplay.classList.remove('hidden');
+                questionDisplay.classList.add('fade-in');
+                
+                // Start timer automatically
+                startTimer();
+            }
+        }
+
+        // Hide question and mark as used
+        function hideQuestion() {
+            if (currentQuestion) {
+                const prevBtn = document.querySelector(`.number-btn[data-number="${currentQuestion}"]`);
+                if (prevBtn) {
+                    prevBtn.classList.remove('selected');
+                    prevBtn.style.backgroundColor = '';
+                    prevBtn.style.borderColor = '';
+                }
+                usedQuestions[currentRound].push(currentQuestion);
+                renderQuestionGrid();
+            }
+            
+            questionDisplay.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+            currentQuestion = null;
+            
+            // Pause timer when going back
+            pauseTimer();
+        }
+
+        // Reveal answer
+        function revealAnswer() {
+            if (currentRound === 'rapidFire' && currentQuestion) {
+                const questions = quizData.rapidFire[currentQuestion - 1].questions;
+                let summaryHtml = '<div class="text-left"><h3 class="text-xl font-semibold mb-4">Rapid Fire Round Summary:</h3>';
+                questions.forEach((q, i) => {
+                    summaryHtml += `
+                        <div class="mb-6 p-4 bg-gray-800/50 rounded-lg fade-in">
+                            <p class="mb-2"><strong>Question ${i+1}:</strong> ${q.question}</p>
+                            <p class="answer-text"><strong>Answer:</strong> ${q.answer}</p>
+                        </div>`;
+                });
+                summaryHtml += '</div>';
+                
+                questionText.innerHTML = summaryHtml;
+            } else {
+                answerText.classList.remove('hidden');
+                answerText.classList.add('fade-in');
+            }
+            resetTimer(); // Will reset to 30 seconds
+            startTimer();
+        }
+
+        // Timer functions
+        function startTimer() {
+            if (isTimerRunning) return;
+            
+            isTimerRunning = true;
+            timerDisplay.classList.add('timer-active');
+            
+            timerInterval = setInterval(() => {
+                if (timerValue > 0) {
+                    timerValue--;
+                    timerDisplay.textContent = timerValue;
+                }
+                
+                if (timerValue === 0) {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    timerDisplay.classList.remove('timer-active');
+                    timerDisplay.dispatchEvent(new Event('timerExpired'));
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            timerDisplay.classList.remove('timer-active');
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            timerValue = timerPresets[0]; // Reset to first preset (30 seconds)
+            timerDisplay.textContent = timerValue;
+            currentTimerPresetIndex = 0; // Reset preset index
+        }
+
+        function passTimer() {
+            if (currentTimerPresetIndex < timerPresets.length - 1) {
+                currentTimerPresetIndex++;
+            }
+            timerValue = timerPresets[currentTimerPresetIndex];
+            timerDisplay.textContent = timerValue;
+            pauseTimer();
+            startTimer();
+        }
+
+        // Render scoreboard
+        function renderScoreboard() {
+            scoreboard.innerHTML = '';
+            
+            // Sort houses by score (descending)
+            const sortedHouses = [...houses].sort((a, b) => b.score - a.score);
+            
+            sortedHouses.forEach(house => {
+                const card = document.createElement('div');
+                card.className = `house-card house-${house.color} p-4 text-white`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-1 mb-1">
+                        <div class="w-2 h-2 rounded-full bg-${house.color}-500"></div>
+                        <h3 class="font-bold text-sm">${house.name}</h3>
+                    </div>
+                    <p class="text-xl font-bold mb-1 text-center">${house.score}</p>
+                    <div class="flex justify-between gap-0.5">
+                        <button class="score-btn w-1/2 bg-gray-800/50 hover:bg-gray-800 px-0.5 py-0.5 rounded transition-all text-[0.65rem]" 
+                                data-house="${house.color}" data-change="-5">
+                            <i class="fas fa-minus"></i> 5
+                        </button>
+                        <button class="score-btn w-1/2 bg-gray-800/50 hover:bg-gray-800 px-0.5 py-0.5 rounded transition-all text-[0.65rem]" 
+                                data-house="${house.color}" data-change="5">
+                            <i class="fas fa-plus"></i> 5
+                        </button>
+                    </div>
+                `;
+                
+                scoreboard.appendChild(card);
+            });
+            
+            // Add event listeners to score buttons
+            document.querySelectorAll('.score-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const houseColor = e.target.dataset.house;
+                    const change = parseInt(e.target.dataset.change);
+                    updateScore(houseColor, change);
+                    
+                    // Pause timer when score is updated
+                    pauseTimer();
+                });
+            });
+        }
+
+        // Update house score
+        function updateScore(houseColor, change) {
+            const house = houses.find(h => h.color === houseColor);
+            if (house) {
+                house.score += change;
+                if (house.score < 0) house.score = 0;
+                renderScoreboard();
+                resetTimer(); // Will reset to 30 seconds
+                startTimer();
+            }
+        }
+
+        // Change round
+        function changeRound(round) {
+            currentRound = round;
+            currentTimerPresetIndex = 0;
+            resetTimer();
+            
+            // Update active button
+            roundGeneralBtn.classList.remove('active');
+            roundAudioBtn.classList.remove('active');
+            roundRapidBtn.classList.remove('active');
+            
+            if (round === 'general') {
+                roundGeneralBtn.classList.add('active');
+            } else if (round === 'audioVisual') {
+                roundAudioBtn.classList.add('active');
+            } else {
+                roundRapidBtn.classList.add('active');
+            }
+            
+            renderQuestionGrid();
+            hideQuestion();
+        }
+
+        // Setup event listeners
+        function setupTimerPresets() {
+            document.querySelectorAll('.timer-preset').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    pauseTimer();
+                    timerValue = parseInt(btn.dataset.time);
+                    timerDisplay.textContent = timerValue;
+                    startTimer();
+                });
+            });
+        }
+
+        function resetTimerToDefault() {
+            currentTimerPresetIndex = 0;
+            resetTimer();
+        }
+
+        function setupEventListeners() {
+            setupTimerPresets();
+            backBtn.addEventListener('click', hideQuestion);
+            revealBtn.addEventListener('click', () => {
+                revealAnswer();
+                resetTimerToDefault();
+            });
+            
+            timerPlayBtn.addEventListener('click', startTimer);
+            timerPauseBtn.addEventListener('click', pauseTimer);
+            document.getElementById('timer-reset').addEventListener('click', resetTimerToDefault);
+            timerPassBtn.addEventListener('click', passTimer);
+            
+            document.getElementById('round-general').addEventListener('click', () => changeRound('general'));
+            document.getElementById('round-audio').addEventListener('click', () => changeRound('audioVisual'));
+            document.getElementById('round-rapid').addEventListener('click', () => changeRound('rapidFire'));
+
+            document.getElementById('rules-btn').addEventListener('click', () => {
+                const rulesContent = document.getElementById('rules-content');
+                rulesContent.classList.toggle('hidden');
+            });
+        }
+
+        // Rapid fire functionality
+        function startRapidFire(setNumber) {
+            const questions = quizData.rapidFire[setNumber - 1].questions;
+            let currentQIndex = 0;
+            let revealedAnswers = [];
+            
+            // Create navigation controls
+            const navControls = document.createElement('div');
+            navControls.className = 'flex justify-center gap-4 mt-6';
+            navControls.innerHTML = `
+                <button id="prev-btn" class="bg-gray-600/50 hover:bg-gray-600 text-white px-6 py-3 rounded-lg transition-all hidden">
+                    <i class="fas fa-arrow-left mr-2"></i> Previous
+                </button>
+                <button id="reveal-btn" class="bg-green-600/50 hover:bg-green-600 text-white px-6 py-3 rounded-lg transition-all">
+                    Reveal Answer <i class="fas fa-eye ml-2"></i>
+                </button>
+                <button id="next-btn" class="bg-blue-600/50 hover:bg-blue-600 text-white px-6 py-3 rounded-lg transition-all">
+                    Next <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+                <button id="end-btn" class="bg-red-600/50 hover:bg-red-600 text-white px-6 py-3 rounded-lg transition-all hidden">
+                    Finish Round
+                </button>
+            `;
+            
+            // Replace default buttons with rapid fire controls
+            const oldControls = document.querySelector('.question-box .flex.justify-center');
+            oldControls.replaceWith(navControls);
+            
+            const showQuestion = (index) => {
+                if (index >= 0 && index < questions.length) {
+                    const q = questions[index];
+                    questionText.textContent = q.question;
+                    
+                    // Show answer if it was already revealed
+                    if (revealedAnswers.includes(index)) {
+                        answerText.textContent = q.answer;
+                        answerText.classList.remove('hidden');
+                    } else {
+                        answerText.textContent = '';
+                        answerText.classList.add('hidden');
+                    }
+                    
+                    // Update nav buttons
+                    document.getElementById('prev-btn').classList.toggle('hidden', index === 0);
+                    document.getElementById('next-btn').classList.toggle('hidden', index === questions.length - 1);
+                    document.getElementById('end-btn').classList.toggle('hidden', index !== questions.length - 1);
+                    
+                    // Reset timer for each question (10 seconds)
+                    resetTimer(10);
+                    startTimer();
+                }
+            };
+            
+            // Reveal current answer
+            document.getElementById('reveal-btn').addEventListener('click', () => {
+                if (!revealedAnswers.includes(currentQIndex)) {
+                    revealedAnswers.push(currentQIndex);
+                    answerText.textContent = questions[currentQIndex].answer;
+                    answerText.classList.remove('hidden');
+                    answerText.classList.add('fade-in');
+                }
+            });
+            
+            // Timer expiration handler
+            const onTimerExpire = () => {
+                if (currentQIndex < questions.length - 1) {
+                    currentQIndex++;
+                    showQuestion(currentQIndex);
+                } else {
+                    // Last question expired
+                    pauseTimer();
+                    showSummary();
+                }
+            };
+            
+            
+            // Event listeners
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                pauseTimer();
+                currentQIndex--;
+                showQuestion(currentQIndex);
+            });
+            
+            document.getElementById('next-btn').addEventListener('click', () => {
+                pauseTimer();
+                currentQIndex++;
+                showQuestion(currentQIndex);
+            });
+            
+            document.getElementById('end-btn').addEventListener('click', () => {
+                pauseTimer();
+                hideQuestion();
+            });
+            
+            // Show first question
+            showQuestion(0);
+            
+            // Override timer expiration behavior for rapid fire
+            timerDisplay.addEventListener('timerExpired', onTimerExpire);
+        }
+        
+        // Modified timer reset function
+        function resetTimer(seconds = 30) {
+            pauseTimer();
+            timerValue = seconds;
+            timerDisplay.textContent = timerValue;
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
