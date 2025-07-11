@@ -722,7 +722,7 @@
                 answerText.classList.add('hidden');
                 
                 questionCategory.textContent = 
-                    currentRound === 'general' ? 'General Question' :
+                    currentRound === 'general' ? 'The General Round' :
                     'Audio-Visual Question';
                 
                 welcomeScreen.classList.add('hidden');
@@ -774,7 +774,7 @@
                 answerText.classList.remove('hidden');
                 answerText.classList.add('fade-in');
             }
-            resetTimer(); // Will reset to 30 seconds
+            resetTimer(); // Will reset to 35 seconds
             startTimer();
         }
 
@@ -808,7 +808,7 @@
 
         function resetTimer() {
             pauseTimer();
-            timerValue = timerPresets[0]; // Reset to first preset (30 seconds)
+            timerValue = timerPresets[0]; // Reset to first preset (35 seconds)
             timerDisplay.textContent = timerValue;
             currentTimerPresetIndex = 0; // Reset preset index
         }
@@ -1045,7 +1045,7 @@
         }
         
         // Modified timer reset function
-        function resetTimer(seconds = 30) {
+        function resetTimer(seconds = 35) {
             pauseTimer();
             timerValue = seconds;
             timerDisplay.textContent = timerValue;
