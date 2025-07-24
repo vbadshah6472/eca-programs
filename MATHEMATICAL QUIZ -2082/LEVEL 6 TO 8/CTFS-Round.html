@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 CATCH THE STARS - THE CTR ROUND</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #e0e6ed;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background stars */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #ffffff, transparent),
+                radial-gradient(2px 2px at 40px 70px, #64ffda, transparent),
+                radial-gradient(1px 1px at 90px 40px, #ffd700, transparent),
+                radial-gradient(1px 1px at 130px 80px, #ff6b9d, transparent),
+                radial-gradient(2px 2px at 160px 30px, #c7ecee, transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: sparkle 20s linear infinite;
+            opacity: 0.6;
+            z-index: -1;
+        }
+
+        @keyframes sparkle {
+            from { transform: translateY(0px); }
+            to { transform: translateY(-100px); }
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 25px;
+            padding: 25px;
+            min-height: 100vh;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .panel {
+            background: linear-gradient(145deg, rgba(30, 30, 60, 0.9), rgba(20, 20, 40, 0.9));
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, #64ffda, transparent);
+            opacity: 0.5;
+        }
+
+        .panel h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.6em;
+            background: linear-gradient(45deg, #64ffda, #ffd700, #ff6b9d);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+            font-weight: bold;
+        }
+
+        /* Left Panel - Question Grid */
+        .question-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .question-btn {
+            padding: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(145deg, #2d3748, #1a202c);
+            color: #64ffda;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(100, 255, 218, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .question-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(100, 255, 218, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .question-btn:hover::before {
+            left: 100%;
+        }
+
+        .question-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 25px rgba(100, 255, 218, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            border-color: #64ffda;
+        }
+
+        .question-btn:disabled {
+            background: linear-gradient(145deg, #1a1a2e, #0f0f23);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+            color: #4a5568;
+            border-color: rgba(74, 85, 104, 0.3);
+        }
+
+        .question-btn.selected {
+            background: linear-gradient(145deg, #48cc6c, #38a169);
+            color: #ffffff;
+            box-shadow: 
+                0 4px 20px rgba(72, 204, 108, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+            border-color: #48cc6c;
+        }
+
+        .question-btn.used {
+            background: linear-gradient(145deg, #e53e3e, #c53030);
+            color: #ffffff;
+            cursor: not-allowed;
+            box-shadow: 
+                0 4px 20px rgba(229, 62, 62, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border-color: #e53e3e;
+        }
+
+        .question-btn.used:hover {
+            transform: none;
+            background: linear-gradient(145deg, #e53e3e, #c53030);
+            color: #ffffff;
+            border-color: #e53e3e;
+            box-shadow: 
+                0 4px 20px rgba(229, 62, 62, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        /* Timer */
+        .timer-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .timer-circle {
+            width: 130px;
+            height: 130px;
+            margin: 0 auto 25px;
+            position: relative;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #ff6b9d 0deg, #ff6b9d var(--progress, 0deg), rgba(100, 255, 218, 0.2) var(--progress, 0deg));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #ffffff;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            border: 3px solid rgba(100, 255, 218, 0.3);
+            box-shadow: 
+                0 0 30px rgba(255, 107, 157, 0.3),
+                inset 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .timer-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .timer-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .preset-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(145deg, #4a5568, #2d3748);
+            color: #e0e6ed;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            font-weight: 500;
+            min-width: 35px;
+        }
+
+        .preset-btn:hover {
+            background: linear-gradient(145deg, #64ffda, #4fd1c7);
+            color: #0f0f23;
+            border-color: #64ffda;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(100, 255, 218, 0.3);
+        }
+
+        .timer-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #2d3748, #1a202c);
+            color: #e0e6ed;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+            font-weight: 500;
+        }
+
+        .timer-btn:hover {
+            background: linear-gradient(145deg, #4a5568, #2d3748);
+            color: #64ffda;
+            border-color: #64ffda;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(100, 255, 218, 0.2);
+        }
+
+        /* Center Panel - Main Display */
+        .center-panel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .expression-area {
+            width: 100%;
+            height: 420px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(15, 15, 35, 0.8), rgba(26, 26, 46, 0.8));
+            border: 2px dashed rgba(100, 255, 218, 0.4);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .falling-char {
+            position: absolute;
+            font-size: 3.5em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ffd700, #64ffda, #ff6b9d);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+            animation: fall 3s ease-in;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.4));
+        }
+
+        @keyframes fall {
+            0% {
+                top: -60px;
+                opacity: 1;
+                transform: scale(0.8) rotate(-10deg);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.1) rotate(5deg);
+            }
+            100% {
+                top: 100%;
+                opacity: 0;
+                transform: scale(0.9) rotate(10deg);
+            }
+        }
+
+        .input-section {
+            width: 100%;
+            text-align: center;
+        }
+
+        .answer-input {
+            width: 220px;
+            padding: 18px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(145deg, rgba(45, 55, 72, 0.9), rgba(26, 32, 44, 0.9));
+            color: #e0e6ed;
+            text-align: center;
+            margin-bottom: 25px;
+            outline: none;
+            border: 2px solid rgba(100, 255, 218, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .answer-input:focus {
+            border-color: #64ffda;
+            box-shadow: 
+                inset 0 2px 8px rgba(0, 0, 0, 0.2),
+                0 0 20px rgba(100, 255, 218, 0.3);
+        }
+
+        .answer-input:disabled {
+            background: linear-gradient(145deg, rgba(26, 26, 46, 0.5), rgba(15, 15, 35, 0.5));
+            cursor: not-allowed;
+            border-color: rgba(74, 85, 104, 0.3);
+            color: #4a5568;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 18px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 14px 28px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            border: 1px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn {
+            background: linear-gradient(145deg, #64ffda, #4fd1c7);
+            color: #0f0f23;
+            border-color: #64ffda;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(100, 255, 218, 0.4);
+            background: linear-gradient(145deg, #4fd1c7, #38b2ac);
+        }
+
+        .submit-btn:disabled {
+            background: linear-gradient(145deg, rgba(74, 85, 104, 0.5), rgba(45, 55, 72, 0.5));
+            cursor: not-allowed;
+            transform: none;
+            color: #4a5568;
+            border-color: rgba(74, 85, 104, 0.3);
+        }
+
+        .reveal-btn {
+            background: linear-gradient(145deg, #ffd700, #f6ad55);
+            color: #0f0f23;
+            border-color: #ffd700;
+        }
+
+        .reveal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
+            background: linear-gradient(145deg, #f6ad55, #ed8936);
+        }
+
+        .pass-btn {
+            background: linear-gradient(145deg, #ff6b9d, #e53e3e);
+            color: #ffffff;
+            border-color: #ff6b9d;
+        }
+
+        .pass-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 107, 157, 0.4);
+            background: linear-gradient(145deg, #e53e3e, #c53030);
+        }
+
+        .feedback {
+            margin-top: 25px;
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .correct {
+            color: #64ffda;
+            text-shadow: 0 0 20px rgba(100, 255, 218, 0.6);
+            animation: glow 0.5s ease-in-out;
+        }
+
+        .incorrect {
+            color: #ff6b9d;
+            text-shadow: 0 0 20px rgba(255, 107, 157, 0.6);
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes glow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Right Panel - Rules */
+        .rules-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .rules-list li {
+            padding: 18px;
+            margin-bottom: 15px;
+            background: linear-gradient(145deg, rgba(45, 55, 72, 0.6), rgba(26, 32, 44, 0.6));
+            border-radius: 12px;
+            border-left: 4px solid #64ffda;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(100, 255, 218, 0.2);
+        }
+
+        .rules-list li:hover {
+            background: linear-gradient(145deg, rgba(45, 55, 72, 0.8), rgba(26, 32, 44, 0.8));
+            transform: translateX(8px);
+            border-left-color: #ffd700;
+            box-shadow: 0 4px 15px rgba(100, 255, 218, 0.2);
+        }
+
+        .rule-number {
+            font-size: 1.3em;
+            margin-right: 12px;
+        }
+
+        .placeholder-text {
+            color: rgba(224, 230, 237, 0.7);
+            font-size: 1.2em;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(100, 255, 218, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .question-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+            
+            .question-btn {
+                padding: 15px 8px;
+                font-size: 1.1em;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .panel {
+                padding: 20px;
+            }
+            
+            .question-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .control-buttons {
+                flex-direction: column;
+            }
+            
+            .control-btn {
+                width: 100%;
+            }
+
+            .timer-circle {
+                width: 110px;
+                height: 110px;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Panel -->
+        <div class="panel">
+            <h2>🎯 Questions</h2>
+            <div class="question-grid">
+                <button class="question-btn" data-question="1">1</button>
+                <button class="question-btn" data-question="2">2</button>
+                <button class="question-btn" data-question="3">3</button>
+                <button class="question-btn" data-question="4">4</button>
+                <button class="question-btn" data-question="5">5</button>
+                <button class="question-btn" data-question="6">6</button>
+                <button class="question-btn" data-question="7">7</button>
+                <button class="question-btn" data-question="8">8</button>
+                <button class="question-btn" data-question="9">9</button>
+
+            </div>
+            
+            <div class="timer-container">
+                <div class="timer-circle" id="timerCircle">20</div>
+                <div class="timer-presets">
+                    <button class="preset-btn" data-time="20">20s</button>
+                    <button class="preset-btn" data-time="15">15s</button>
+                    <button class="preset-btn" data-time="10">10s</button>
+                    <button class="preset-btn" data-time="5">5s</button>
+                </div>
+                <div class="timer-controls">
+                    <button class="timer-btn" id="startBtn">Start</button>
+                    <button class="timer-btn" id="pauseBtn">Pause</button>
+                    <button class="timer-btn" id="resetBtn">Reset</button>
+                    <button class="timer-btn" id="passBtn">Pass</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Panel -->
+        <div class="panel center-panel">
+            <h2>🌟 CATCH THE STARS - THE CTR ROUND [6-8]</h2>
+            <div class="expression-area" id="expressionArea">
+                <div class="placeholder-text">Select a number to start the challenge!</div>
+            </div>
+            
+            <div class="input-section">
+                <input type="number" class="answer-input" id="answerInput" placeholder="Enter Answer" disabled>
+                <div class="control-buttons">
+                    <button class="control-btn submit-btn" id="submitBtn" disabled>Submit Answer</button>
+                    <button class="control-btn reveal-btn" id="revealBtn">Reveal Answer</button>
+                    <button class="control-btn pass-btn" id="passMainBtn">Pass</button>
+                </div>
+                <div class="feedback" id="feedback"></div>
+            </div>
+        </div>
+
+        <!-- Right Panel -->
+        <div class="panel">
+            <h2>📋 Rules</h2>
+            <ul class="rules-list">
+                <li><span class="rule-number">1️⃣</span>Different numbers fall like stars — solve quickly based on the order of appearance.</li>
+                <li><span class="rule-number">2️⃣</span>Must answer in 20 Seconds Timer that auto-starts after the stars finish falling. </li>  
+                <li><span class="rule-number">3️⃣</span>The questions in this round won't be passed to any other teams. </li>
+                <li><span class="rule-number">4️⃣</span>Reward Points : 1st Attempt = 20p, 2nd Attempt = 15p, 3rd Attempt = 10p, Other Attempt = 5p.</li>
+                <li><span class="rule-number">5️⃣</span>Failure to provide correct answer before the time runs out results 10 POINTS DEDUCTION. </li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Math expressions with answers
+        const expressions = [
+            { expression: "5 * 3 + 7 / 2 - 1", answer: 10 }, 
+            { expression: "15 / 5 * 6 + 3 - 2", answer: 19 },
+            { expression: "12 * 2 - 4 / 2 + 1", answer: 11 },
+            { expression: "14 / 2 + 5 * 3 - 1", answer: 35 },
+            { expression: "10 * 2 + 8 / 4 - 3", answer: 4 },
+            { expression: "18 / 3 + 7 * 2 - 5", answer: 21 },
+            { expression: "16 / 4 + 9 * 2 - 3", answer: 23 },
+            { expression: "10 * 6 / 4 - 1 + 4", answer: 18 },
+            { expression: "20 / 5 + 3 * 2 - 3", answer: 11 },
+        ];
+
+        // Game state
+        let currentQuestion = null;
+        let currentExpression = null;
+        let timer = null;
+        let timerDuration = 20;
+        let timeLeft = timerDuration;
+        let usedQuestions = new Set();
+        let score = 0;
+        let isAnimating = false;
+        let isPaused = false;
+        let passCount = 0; // Track number of passes for current question
+
+        // DOM elements
+        const questionBtns = document.querySelectorAll('.question-btn');
+        const expressionArea = document.getElementById('expressionArea');
+        const answerInput = document.getElementById('answerInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const revealBtn = document.getElementById('revealBtn');
+        const passMainBtn = document.getElementById('passMainBtn');
+        const feedback = document.getElementById('feedback');
+        const timerCircle = document.getElementById('timerCircle');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const passBtn = document.getElementById('passBtn');
+        const presetBtns = document.querySelectorAll('.preset-btn');
+
+        // Initialize game
+        function init() {
+            // Question button event listeners
+            questionBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (!isAnimating && !usedQuestions.has(btn.dataset.question)) {
+                        selectQuestion(btn.dataset.question);
+                    }
+                });
+            });
+
+            // Control button event listeners
+            submitBtn.addEventListener('click', submitAnswer);
+            revealBtn.addEventListener('click', revealAnswer);
+            passMainBtn.addEventListener('click', passQuestion);
+            
+            // Timer control event listeners
+            startBtn.addEventListener('click', startTimer);
+            pauseBtn.addEventListener('click', pauseTimer);
+            resetBtn.addEventListener('click', resetTimer);
+            passBtn.addEventListener('click', passQuestion);
+
+            // Timer preset event listeners
+            presetBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setTimerDuration(parseInt(btn.dataset.time));
+                });
+            });
+
+            // Enter key for submit
+            answerInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !submitBtn.disabled) {
+                    submitAnswer();
+                }
+            });
+        }
+
+        // Select question and start animation
+        function selectQuestion(questionNum) {
+            if (isAnimating) return;
+            
+            currentQuestion = questionNum;
+            currentExpression = expressions[questionNum - 1];
+            passCount = 0; // Reset pass count for new question
+            
+            // Update UI
+            questionBtns.forEach(btn => btn.classList.remove('selected'));
+            const selectedBtn = document.querySelector(`[data-question="${questionNum}"]`);
+            selectedBtn.classList.add('selected');
+            
+            // Clear previous state
+            clearTimer();
+            resetInputs();
+            
+            // Start falling animation
+            startFallingAnimation();
+        }
+
+        // Generate random position within the expression area
+        function getRandomPosition() {
+            const areaWidth = expressionArea.offsetWidth;
+            const areaHeight = expressionArea.offsetHeight;
+            
+            return {
+                x: Math.random() * (areaWidth - 100) + 50, // Leave some margin
+                y: -60 // Start above the visible area
+            };
+        }
+
+        // Start falling animation with random positions
+        function startFallingAnimation() {
+            isAnimating = true;
+            expressionArea.innerHTML = '';
+            
+            const chars = currentExpression.expression.split('');
+            let delay = 0;
+            
+            chars.forEach((char, index) => {
+                setTimeout(() => {
+                    createFallingChar(char, index);
+                    
+                    // If this is the last character, start timer after animation
+                    if (index === chars.length - 1) {
+                        setTimeout(() => {
+                            isAnimating = false;
+                            enableInputs();
+                            startTimer();
+                        }, 3000); // Wait for falling animation to complete (3s)
+                    }
+                }, delay);
+                
+                delay += 1000; // 1 second between each character
+            });
+        }
+
+        // Create falling character at random position
+        function createFallingChar(char, index) {
+            const charElement = document.createElement('div');
+            charElement.className = 'falling-char';
+            charElement.textContent = char;
+            
+            const position = getRandomPosition();
+            charElement.style.left = `${position.x}px`;
+            charElement.style.top = `${position.y}px`;
+            
+            expressionArea.appendChild(charElement);
+        }
+
+        // Enable inputs after animation
+        function enableInputs() {
+            answerInput.disabled = false;
+            submitBtn.disabled = false;
+            answerInput.focus();
+        }
+
+        // Reset inputs
+        function resetInputs() {
+            answerInput.value = '';
+            answerInput.disabled = true;
+            submitBtn.disabled = true;
+            feedback.textContent = '';
+            feedback.className = 'feedback';
+        }
+
+        // Submit answer
+        function submitAnswer() {
+            const userAnswer = parseInt(answerInput.value);
+            
+            if (isNaN(userAnswer)) {
+                feedback.textContent = '❌ Please enter a valid number';
+                feedback.className = 'feedback incorrect';
+                return;
+            }
+            
+            if (userAnswer === currentExpression.answer) {
+                feedback.textContent = '✅ Correct!';
+                feedback.className = 'feedback correct';
+                score += 5;
+                
+                // Mark question as used
+                usedQuestions.add(currentQuestion);
+                const questionBtn = document.querySelector(`[data-question="${currentQuestion}"]`);
+                questionBtn.classList.remove('selected');
+                questionBtn.classList.add('used');
+                questionBtn.disabled = true;
+                
+                // Clear timer and reset
+                clearTimer();
+                setTimeout(() => {
+                    resetGame();
+                }, 2000);
+            } else {
+                feedback.textContent = '❌ Incorrect';
+                feedback.className = 'feedback incorrect';
+                answerInput.value = '';
+                answerInput.focus();
+            }
+        }
+
+        // Reveal answer
+        function revealAnswer() {
+            if (currentExpression) {
+                feedback.textContent = `📖 Answer: ${currentExpression.answer}`;
+                feedback.className = 'feedback';
+                
+                // Mark question as used (red)
+                usedQuestions.add(currentQuestion);
+                const questionBtn = document.querySelector(`[data-question="${currentQuestion}"]`);
+                questionBtn.classList.remove('selected');
+                questionBtn.classList.add('used');
+                questionBtn.disabled = true;
+                
+                clearTimer();
+                setTimeout(() => {
+                    resetGame();
+                }, 3000);
+            }
+        }
+
+        // Pass question
+        function passQuestion() {
+            if (currentExpression && currentQuestion) {
+                passCount++;
+                
+                // Determine new timer duration based on pass count
+                let newDuration;
+                if (passCount === 1) {
+                    newDuration = 15;
+                } else if (passCount === 2) {
+                    newDuration = 10;
+                } else if (passCount === 3) {
+                    newDuration = 5;
+                } else {
+                    // After 3 passes, mark as used and reset
+                    usedQuestions.add(currentQuestion);
+                    const questionBtn = document.querySelector(`[data-question="${currentQuestion}"]`);
+                    questionBtn.classList.remove('selected');
+                    questionBtn.classList.add('used');
+                    questionBtn.disabled = true;
+                    clearTimer();
+                    resetGame();
+                    return;
+                }
+                
+                // Update timer duration and restart
+                timerDuration = newDuration;
+                clearTimer();
+                resetInputs();
+                feedback.textContent = `⏭️ Passed! Timer reduced to ${newDuration}s`;
+                feedback.className = 'feedback';
+                
+                setTimeout(() => {
+                    feedback.textContent = '';
+                    enableInputs();
+                    startTimer();
+                }, 1500);
+            } else {
+                clearTimer();
+                resetGame();
+            }
+        }
+
+        // Start timer
+        function startTimer() {
+            if (timer || !currentExpression) return;
+            
+            timeLeft = timerDuration;
+            updateTimerDisplay();
+            
+            timer = setInterval(() => {
+                if (!isPaused) {
+                    timeLeft--;
+                    updateTimerDisplay();
+                    
+                    if (timeLeft <= 0) {
+                        clearTimer();
+                        feedback.textContent = '⏰ Time\'s up!';
+                        feedback.className = 'feedback incorrect';
+                        setTimeout(() => {
+                            resetGame();
+                        }, 2000);
+                    }
+                }
+            }, 1000);
+        }
+
+        // Pause timer
+        function pauseTimer() {
+            isPaused = !isPaused;
+            pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+        }
+
+        // Reset timer
+        function resetTimer() {
+            clearTimer();
+            timeLeft = timerDuration;
+            updateTimerDisplay();
+            if (currentExpression && !isAnimating) {
+                startTimer();
+            }
+        }
+
+        // Set timer duration
+        function setTimerDuration(duration) {
+            timerDuration = duration;
+            if (!timer) {
+                timeLeft = timerDuration;
+                updateTimerDisplay();
+            }
+        }
+
+        // Clear timer
+        function clearTimer() {
+            if (timer) {
+                clearInterval(timer);
+                timer = null;
+            }
+            isPaused = false;
+            pauseBtn.textContent = 'Pause';
+        }
+
+        // Update timer display
+        function updateTimerDisplay() {
+            timerCircle.textContent = timeLeft;
+            const progress = ((timerDuration - timeLeft) / timerDuration) * 360;
+            timerCircle.style.setProperty('--progress', `${progress}deg`);
+        }
+
+        // Reset game
+        function resetGame() {
+            currentQuestion = null;
+            currentExpression = null;
+            expressionArea.innerHTML = '<div class="placeholder-text">Select a number to start the challenge!</div>';
+            resetInputs();
+            clearTimer();
+            timeLeft = timerDuration;
+            updateTimerDisplay();
+            
+            // Clear question selection
+            questionBtns.forEach(btn => btn.classList.remove('selected'));
+        }
+
+        // Initialize the game
+        init();
+    </script>
+</body>
+</html>

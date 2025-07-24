@@ -1,0 +1,1537 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shree Tikuligadh Secondary School - Math Quiz Contest</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fall {
+            0% { 
+                transform: translateY(-100px) rotate(0deg); 
+                opacity: 0; 
+            }
+            100% { 
+                transform: translateY(0) rotate(360deg); 
+                opacity: 1; 
+            }
+        }
+        .falling-element {
+            position: absolute;
+            top: 0;
+            opacity: 0;
+            will-change: transform, opacity;
+        }
+        .falling-element {
+            animation: fall 1s ease-out forwards;
+        }
+        .falling-expression {
+            position: absolute;
+            color: white;
+            text-shadow: 0 0 5px rgba(255,255,255,0.5);
+            transition: opacity 0.5s ease-out;
+            z-index: 10;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(500px) rotate(360deg); opacity: 0; }
+        }
+        .confetti-animate {
+            animation: confetti-fall 3s ease-out forwards;
+        }
+        .buzzer-active {
+            transform: scale(0.95);
+            box-shadow: 0 0 20px currentColor;
+        }
+        .question-used {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
+    <!-- Header -->
+    <header class="bg-blue-900 py-4 px-6 shadow-lg">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-center">
+                <h1 class="text-2xl md:text-3xl font-bold">SHREE TIKULIGADH SECONDARY SCHOOL</h1>
+            </div>
+            <div class="text-lg md:text-xl font-semibold">
+                <span class="bg-yellow-600 px-3 py-1 rounded">Math Quiz Contest [1-5]</span>
+                <span class="ml-2">7th Shrawan, 2082</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Left Sidebar - Round Selection -->
+        <div class="w-1/5 bg-gray-800 p-4 flex flex-col">
+            <h2 class="text-xl font-bold mb-4 border-b pb-2">Rounds</h2>
+            <button onclick="showRound('general')" class="round-btn bg-blue-600 hover:bg-blue-700 mb-4 text-xl p-3 rounded-lg">🟦 The General Round (1-20)</button>
+            <button onclick="showRound('relay')" class="round-btn bg-green-600 hover:bg-green-700 mb-4 text-xl p-3 rounded-lg">🟩 The ETR Round (1-4)</button>
+            <button onclick="showRound('fastest')" class="round-btn bg-red-600 hover:bg-red-700 mb-4 text-xl p-3 rounded-lg">🟥 The CTS Round (1-8)</button>
+            <button onclick="showRound('target')" class="round-btn bg-purple-600 hover:bg-purple-700 mb-4 text-xl p-3 rounded-lg">🟪 Hit The Target Round (1-4)</button>
+            <button onclick="showRound('mcq')" class="round-btn bg-indigo-600 hover:bg-indigo-700 mb-4 text-xl p-3 rounded-lg">🟦 The MCQ Round (1-8)</button>
+
+            <!-- Question Grid (General Round Only) -->
+            <div id="question-grid" class="mt-6 hidden">
+                <h3 class="font-bold mb-2">Question Grid</h3>
+                <div class="grid grid-cols-5 gap-2" id="general-grid">
+                    <!-- Numbers 1-30 will be inserted here -->
+                </div>
+                <div class="grid grid-cols-4 gap-2 hidden" id="relay-grid"></div>
+                <div class="grid grid-cols-4 gap-2 hidden" id="puzzle-grid"></div>
+                <div class="grid grid-cols-4 gap-2 hidden" id="fastest-grid"></div>
+                <div class="grid grid-cols-4 gap-2 hidden" id="target-grid"></div>
+                <div class="grid grid-cols-4 gap-2 hidden" id="mcq-grid"></div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex-1 p-6 overflow-y-auto">
+            <!-- General Round -->
+            <div id="general-round" class="round-content hidden">
+                <h2 class="text-2xl font-bold mb-4">🟦 THE GENERAL ROUND</h2>
+                <div class="bg-gradient-to-br from-blue-900/50 to-purple-900/50 p-6 rounded-xl border-2 border-cyan-400/30 shadow-lg mb-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl text-center">
+                    <h3 class="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">Rules:</h3>
+                    <ul class="space-y-3">
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-cyan-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Select any question number from 1-20</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-cyan-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Each correct answer is worth 5 points</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-cyan-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">30 seconds to answer each question</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-cyan-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Can pass up to 3 times per question</li>
+                    </ul>
+                </div>
+                <div id="general-question" class="bg-gray-800 p-6 rounded-lg min-h-64 flex flex-col items-center justify-center">
+                    <p class="text-center text-gray-400 text-3xl">Select a question number from the grid</p>
+                </div>
+                <div class="mt-4 flex flex-col items-center gap-2">
+                    <div id="pass-count" class="text-sm text-gray-400">Passes used: 0/3</div>
+                    <input id="general-answer" type="text" class="bg-gray-700 border border-gray-600 rounded px-4 py-3 text-xl w-64 text-center" placeholder="Enter answer">
+                    <div class="flex gap-2">
+                        <button id="submit-general" class="bg-blue-700 hover:bg-blue-800 px-6 py-2 rounded text-lg">Submit</button>
+                        <button id="pass-general" class="bg-yellow-600 hover:bg-yellow-700 px-6 py-2 rounded text-lg">Pass</button>
+                        <button id="reveal-general" class="bg-blue-700 hover:bg-blue-800 px-6 py-2 rounded text-lg">Reveal</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Math Relay -->
+            <div id="relay-round" class="round-content hidden">
+                <h2 class="text-2xl font-bold mb-4">🟩THE "ESCAPE THE ROOM" ROUND </h2>
+                <div class="bg-gradient-to-br from-green-900/50 to-emerald-900/50 p-6 rounded-xl border-2 border-emerald-400/30 shadow-lg mb-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl text-center">
+                    <h3 class="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-green-500">Rules:</h3>
+                    <ul class="space-y-3">
+                        <li class="text-lg font-medium flex items-center justify-center before:content-['•'] before:text-emerald-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Select any set from 1-4</li>
+                        <li class="text-lg font-medium flex items-center justify-center before:content-['•'] before:text-emerald-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Each set contains 4 questions</li>
+                        <li class="text-lg font-medium flex items-center justify-center before:content-['•'] before:text-emerald-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Teams send one player at a time to answer</li>
+                        <li class="text-lg font-medium flex items-center justify-center before:content-['•'] before:text-emerald-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">20 seconds per question, 5 points each</li>
+                        <li class="text-lg font-medium flex items-center justify-center before:content-['•'] before:text-emerald-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Must answer in sequence</li>
+                    </ul>
+                </div>
+                <div id="relay-question" class="bg-gray-800 p-6 rounded-lg min-h-64 flex flex-col items-center justify-center">
+                    <p class="text-center text-gray-400">Click Start to begin the relay</p>
+                </div>
+                <div class="mt-4 flex flex-col items-center">
+                    <input id="relay-answer" type="text" class="bg-gray-700 border border-gray-600 rounded px-3 py-2 mb-2 w-64 text-center" placeholder="Your answer">
+                    <div class="flex gap-2">
+                        <button id="submit-relay" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded">Submit</button>
+                        <button id="next-relay" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Next Question</button>
+                        <button id="reveal-relay" class="bg-green-700 hover:bg-green-800 px-4 py-2 rounded">Reveal Answer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Number Puzzle -->
+            <div id="puzzle-round" class="round-content hidden">
+                <h2 class="text-2xl font-bold mb-4">🟧 Number Puzzle</h2>
+                <p class="mb-4">Solve the number puzzles. Each correct answer is worth 10 points.</p>
+                <div id="puzzle-question" class="bg-gray-800 p-6 rounded-lg min-h-40">
+                    <p class="text-center text-gray-400">Click Next to start the puzzle round</p>
+                </div>
+                <div class="mt-4 flex justify-center gap-2">
+                    <button id="next-puzzle" class="bg-orange-700 hover:bg-orange-800 px-4 py-2 rounded">Next Puzzle</button>
+                    <button id="reveal-puzzle" class="bg-orange-700 hover:bg-orange-800 px-4 py-2 rounded disabled:opacity-50" disabled>Reveal Answer</button>
+                </div>
+            </div>
+
+            <!-- Fastest Finger -->
+            <div id="fastest-round" class="round-content hidden">
+                <h2 class="text-2xl font-bold mb-4">🟥 THE "CATCH THE STARS" ROUND</h2>
+                <div class="bg-gradient-to-br from-red-900/50 to-rose-900/50 p-6 rounded-xl border-2 border-rose-400/30 shadow-lg mb-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl text-center">
+                    <style>
+                        .falling-element {
+                            position: absolute;
+                            top: -50px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            font-size: 2rem;
+                            font-weight: bold;
+                            opacity: 0;
+                            animation: fall 1s ease-out forwards;
+                        }
+                        @keyframes fall {
+                            to {
+                                top: 50%;
+                                opacity: 1;
+                            }
+                        }
+                    </style>
+                    <h3 class="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-rose-400 to-red-500">Rules:</h3>
+                    <ul class="space-y-3">
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-rose-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Select any question number from 1-8</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-rose-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Watch the falling math expression</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-rose-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">First team to buzz in gets to answer</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-rose-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Correct answer is worth 15 points</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-rose-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">30 seconds to answer after buzzing</li>
+                    </ul>
+                </div>
+                <div id="fastest-question" class="bg-gray-800 p-6 rounded-lg min-h-64 flex flex-col items-center justify-center relative overflow-hidden">
+                    <div id="expression-container" class="h-64 w-full flex flex-col items-center justify-center relative"></div>
+                    <div id="fastest-controls" class="mt-4 hidden">
+                        <input id="fastest-answer" type="text" class="bg-gray-700 border border-gray-600 rounded px-4 py-2 text-xl w-64 text-center mb-2" placeholder="Your Answer">
+                        <div class="flex gap-2">
+                            <button id="submit-fastest" class="bg-red-700 hover:bg-red-800 px-4 py-2 rounded">Submit Answer</button>
+                            <button id="reveal-fastest" class="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded">Reveal Solution</button>
+                            <button id="next-fastest" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded">Next Expression</button>
+                        </div>
+                    </div>
+                    <p id="fastest-result" class="mt-4 text-xl font-bold hidden"></p>
+                </div>
+                <div class="mt-4 flex flex-col items-center gap-2">
+                    <input id="fastest-answer" type="text" class="bg-gray-700 border border-gray-600 rounded px-4 py-3 text-xl w-64 text-center" placeholder="Enter answer">
+                    <div class="flex gap-2">
+                        <button id="submit-fastest" class="bg-red-700 hover:bg-red-800 px-6 py-2 rounded text-lg">Submit</button>
+                        <button id="pass-fastest" class="bg-yellow-600 hover:bg-yellow-700 px-6 py-2 rounded text-lg">Pass</button>
+                        <button id="reveal-fastest" class="bg-red-700 hover:bg-red-800 px-6 py-2 rounded text-lg">Reveal</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MCQ Round -->
+            <div id="mcq-round" class="round-content hidden">
+                <h2 class="text-2xl font-bold mb-4">🟦THE MCQ ROUND</h2>
+                <div class="bg-gradient-to-br from-indigo-900/50 to-blue-900/50 p-6 rounded-xl border-2 border-indigo-400/30 shadow-lg mb-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl text-center">
+                    <h3 class="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-blue-500">Rules:</h3>
+                    <ul class="space-y-3">
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-indigo-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Select any question number from 1-8</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-indigo-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Each question has 4 options - only one is correct</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-indigo-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">First attempt: 30 seconds</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-indigo-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Second attempt: 20 seconds</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-indigo-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Third and fourth attempts: 10 seconds each</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-indigo-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Correct answer is worth 10 points</li>
+                    </ul>
+                </div>
+                <div id="mcq-question" class="bg-gray-800 p-6 rounded-lg min-h-64 flex flex-col items-center justify-center">
+                    <p class="text-center text-gray-400">Select a question number from the grid</p>
+                </div>
+                <div id="mcq-options" class="flex flex-wrap justify-center gap-4 mt-4 hidden">
+                    <!-- Options will be inserted here dynamically -->
+                </div>
+                <div id="correct-option" class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300">
+                    <div class="bg-green-600 text-white p-4 rounded-lg text-xl font-bold"></div>
+                </div>
+                <div class="mt-4 flex justify-center gap-2">
+                    <button id="next-mcq" class="bg-indigo-700 hover:bg-indigo-800 px-4 py-2 rounded">Next Question</button>
+                    <button id="reveal-mcq" class="bg-indigo-700 hover:bg-indigo-800 px-4 py-2 rounded">Reveal Answer</button>
+                </div>
+            </div>
+
+            <!-- Target Number -->
+            <div id="target-round" class="round-content hidden">
+                <h2 class="text-2xl font-bold mb-4">🟪 Target Number Challenge</h2>
+                <div class="bg-gradient-to-br from-purple-900/50 to-fuchsia-900/50 p-6 rounded-xl border-2 border-purple-400/30 shadow-lg mb-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-xl text-center">
+                    <h3 class="text-2xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-fuchsia-500">Rules:</h3>
+                    <ul class="space-y-3">
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-purple-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Select any problem from 1-4</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-purple-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Use the four numbers with +, -, ×, ÷ to reach target</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-purple-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Each number must be used exactly once</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-purple-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">Correct solution is worth 20 points</li>
+                        <li class="text-lg font-medium flex items-center before:content-['•'] before:text-purple-400 before:text-2xl before:mr-2 before:align-middle hover:text-yellow-300 transition-colors">2 minutes per problem</li>
+                    </ul>
+                </div>
+                <div id="target-question" class="bg-gray-800 p-6 rounded-lg min-h-64 flex flex-col items-center justify-center">
+                    <p class="text-center text-gray-400">Click Next to start the target challenge</p>
+                </div>
+                <div class="mt-4 flex flex-col items-center gap-4">
+                    <input id="target-answer" type="text" class="bg-gray-700 border border-gray-600 rounded px-4 py-3 text-xl w-64 text-center" placeholder="Enter your solution">
+                    <div class="flex gap-2">
+                        <button id="submit-target" class="bg-purple-700 hover:bg-purple-800 px-6 py-2 rounded text-lg">Submit</button>
+                        <button id="next-target" class="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded">Next Problem</button>
+                        <button id="reveal-target" class="bg-purple-700 hover:bg-purple-800 px-4 py-2 rounded disabled:opacity-50" disabled>Reveal Solution</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar - Timer and Scoreboard -->
+        <div class="w-1/5 bg-gray-800 p-4 flex flex-col">
+            <!-- Timer -->
+            <div class="mb-8">
+                <h2 class="text-xl font-bold mb-4 border-b pb-2">Timer</h2>
+                <div class="flex justify-center mb-4">
+                    <div class="relative w-32 h-32">
+                        <svg class="w-full h-full" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="45" fill="none" stroke="#374151" stroke-width="8"/>
+                            <circle id="timer-circle" cx="50" cy="50" r="45" fill="none" stroke="#3B82F6" stroke-width="8" stroke-dasharray="283" stroke-dashoffset="0" transform="rotate(-90 50 50)"/>
+                        </svg>
+                        <div id="timer-display" class="absolute inset-0 flex items-center justify-center text-3xl font-bold">30</div>
+                    </div>
+                </div>
+                <div class="flex justify-between mb-2">
+                    <button onclick="setTimer(30)" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">30s</button>
+                    <button onclick="setTimer(20)" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">20s</button>
+                    <button onclick="setTimer(10)" class="bg-gray-700 hover:bg-gray-600 px-3 py-1 rounded">10s</button>
+                </div>
+                <div class="flex justify-between">
+                    <button id="start-timer" class="bg-green-700 hover:bg-green-800 px-3 py-1 rounded flex-1 mr-1">Start</button>
+                    <button id="pause-timer" class="bg-yellow-700 hover:bg-yellow-800 px-3 py-1 rounded flex-1 mx-1">Pause</button>
+                    <button id="reset-timer" class="bg-red-700 hover:bg-red-800 px-3 py-1 rounded flex-1 ml-1">Reset</button>
+                </div>
+            </div>
+
+            <!-- Scoreboard -->
+            <div>
+                <h2 class="text-xl font-bold mb-4 border-b pb-2">Scoreboard</h2>
+                <div id="scoreboard-container" class="space-y-4">
+                    <!-- Houses will be dynamically sorted here -->
+                    <div class="bg-red-900/50 p-3 rounded-lg" data-house="red">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold">RED HOUSE</span>
+                            <span id="red-score" class="font-bold text-xl">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <button onclick="updateScore('red', -5)" class="bg-red-800 hover:bg-red-700 px-2 py-1 rounded">-5</button>
+                            <button onclick="updateScore('red', 5)" class="bg-red-800 hover:bg-red-700 px-2 py-1 rounded">+5</button>
+                        </div>
+                    </div>
+                    <div class="bg-green-900/50 p-3 rounded-lg" data-house="green">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold">GREEN HOUSE</span>
+                            <span id="green-score" class="font-bold text-xl">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <button onclick="updateScore('green', -5)" class="bg-green-800 hover:bg-green-700 px-2 py-1 rounded">-5</button>
+                            <button onclick="updateScore('green', 5)" class="bg-green-800 hover:bg-green-700 px-2 py-1 rounded">+5</button>
+                        </div>
+                    </div>
+                    <div class="bg-yellow-900/50 p-3 rounded-lg" data-house="yellow">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold">YELLOW HOUSE</span>
+                            <span id="yellow-score" class="font-bold text-xl">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <button onclick="updateScore('yellow', -5)" class="bg-yellow-800 hover:bg-yellow-700 px-2 py-1 rounded">-5</button>
+                            <button onclick="updateScore('yellow', 5)" class="bg-yellow-800 hover:bg-yellow-700 px-2 py-1 rounded">+5</button>
+                        </div>
+                    </div>
+                    <div class="bg-blue-900/50 p-3 rounded-lg" data-house="blue">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="font-bold">BLUE HOUSE</span>
+                            <span id="blue-score" class="font-bold text-xl">0</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <button onclick="updateScore('blue', -5)" class="bg-blue-800 hover:bg-blue-700 px-2 py-1 rounded">-5</button>
+                            <button onclick="updateScore('blue', 5)" class="bg-blue-800 hover:bg-blue-700 px-2 py-1 rounded">+5</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Arrays
+        const generalQuestions = [
+            { question: "The smallest two digit number is ____.", answer: "10" },
+            { question: "If 2x + 4 = 12, what is x?", answer: "4" },
+            { question: "The product of 4 and 6 is", answer: "24" },
+            { question: "How many English alphabet 'A' are there from counting numbers 1 to 100?", answer: "0" },
+            { question: "The missing number in the expression 3² + 4² = __² is:", answer: "5" },
+            { question: "What is 20% of 150?", answer: "30" },
+            { question: "The perimeter of a square with length of its side 5cm is ____ cm.", answer: "20" },
+            { question: "If a triangle has two of its angles 30° and 60°, the third angle will be ___°.", answer: "90" },
+            { question: "What is the next number in the sequence: 10, 20, 30, 40, ...?", answer: "50" },
+            { question: "How many sides are there in a regular Pentagon?", answer: "5" },
+            { question: "What is the square root of 169?", answer: "13" },
+            { question: "The geometrical shape that has no sides and no corners is _________. ", answer: "Circle" },
+            { question: "Fill in the blank space : 2.5 hours = _____ minutes", answer: "150" },
+            { question: "The area of a rectangular field with length 8m and breadth 5m is ____m²?", answer: "40" },
+            { question: "If 2(x + 3) = 16, then the value of x is : ____. ", answer: "5" },
+            { question: "What is the average of 10, 20, and 30?", answer: "20" },
+            { question: "If a car travels 60 km in 1 hour, how far will it travel in 3 hours?", answer: "180 km" },
+            { question: "If a triangle has sides of lengths 3 cm, 4 cm, and 5 cm, what type of triangle is it?", answer: "Right-angled triangle" },
+            { question: "Find the missing number: 5, 10, 15, __, 25", answer: "20" },
+            { question: "What is the sum of the angles in a triangle?", answer: "180°" },
+        ];
+
+        const relayQuestions = [
+            [
+                { question: "What is 5 × 6?", answer: "30" },
+                { question: "Solve 5² - 3²", answer: "16" },
+                { question: "The value of 3/4 x 20 is ___.", answer: "15" },
+                { question: "Solve for x if 2x - 5 = 15", answer: "10"}
+            ],
+            [
+                { question: "What is 12 + 15?", answer: "27" },
+                { question: "Solve: 3x = 21", answer: "7" },
+                { question: "The value of 8 - 3 × 2 is ___.", answer: "2" },
+                { question: "Solve for y if 4(y + 3) = 32", answer: "5" }
+            ],
+             [
+                { question: "What is 3 x 9?", answer: "27" },
+                { question: "Solve: 5x = 25", answer: "5" },
+                { question: "The value of 5 - 1 × 4 is ___.", answer: "2" },
+                { question: "Solve for x if 4x + 3 = 15", answer: "3" }
+            ],
+            [
+                { question: "What is 7 + 8?", answer: "15" },
+                { question: "Solve: 2x + 4 = 12", answer: "4" },
+                { question: "The value of 6 - 2 × 3 is ___.", answer: "0" },
+                { question: "Solve for z if 3z - 6 = 9", answer: "5" }
+            ]
+        ];
+
+        const fastestQuestions = []; // We'll generate expressions dynamically
+
+        function generateExpression() {
+            const operators = ['+', '-', '*', '/'];
+            const length = 5 + Math.floor(Math.random() * 6); // 5-10 elements
+            let expression = [];
+            
+            for (let i = 0; i < length; i++) {
+                // Add number (1-20)
+                expression.push(Math.floor(Math.random() * 20) + 1);
+                
+                // Add operator if not last element
+                if (i < length - 1) {
+                    expression.push(operators[Math.floor(Math.random() * operators.length)]);
+                }
+            }
+            
+            return expression;
+        }
+
+        function showFallingExpression() {
+            const container = document.getElementById('expression-container');
+            container.innerHTML = '';
+            document.getElementById('fastest-controls').classList.add('hidden');
+            document.getElementById('fastest-result').classList.add('hidden');
+            
+            // Generate a simple math expression (e.g., 5 + 3 × 2)
+            const num1 = Math.floor(Math.random() * 10) + 1;
+            const num2 = Math.floor(Math.random() * 10) + 1;
+            const num3 = Math.floor(Math.random() * 10) + 1;
+            const ops = ['+', '-', '×', '÷'];
+            const op1 = ops[Math.floor(Math.random() * ops.length)];
+            const op2 = ops[Math.floor(Math.random() * ops.length)];
+            const expression = `${num1} ${op1} ${num2} ${op2} ${num3}`;
+            
+            // Create and animate each character separately
+            const chars = expression.split('');
+            chars.forEach((char, i) => {
+                const element = document.createElement('div');
+                element.className = 'falling-element';
+                element.textContent = char;
+                element.style.left = `${10 + (i * 10)}%`;
+                element.style.animationDelay = `${i * 0.2}s`;
+                element.style.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+                container.appendChild(element);
+            });
+            
+            // Store the expression for evaluation (replace × and ÷ with * and /)
+            container.dataset.expression = expression.replace(/×/g, '*').replace(/÷/g, '/');
+            
+            // Show answer controls after animation completes
+            setTimeout(() => {
+                showAnswerControls();
+            }, (chars.length * 0.2 * 1000) + 2000);
+        }
+
+        function showAnswerControls() {
+            document.getElementById('fastest-controls').classList.remove('hidden');
+            setTimer(question.times[mcqAttemptCount]);
+            startTimer();
+        }
+
+        function checkFastestAnswer() {
+            const container = document.getElementById('expression-container');
+            const userAnswer = document.getElementById('fastest-answer').value.trim();
+            const expression = container.dataset.expression;
+            
+            try {
+                const correctAnswer = Math.round(eval(expression) * 100) / 100; // Round to 2 decimal places
+                const resultElement = document.getElementById('fastest-result');
+                resultElement.classList.remove('hidden');
+                
+                // Compare answers (accept either decimal or fractional forms)
+                const userNum = parseFloat(userAnswer);
+                if (!isNaN(userNum) && Math.abs(userNum - correctAnswer) < 0.01) {
+                    resultElement.innerHTML = `
+                        <div class="bg-green-800/50 p-4 rounded-lg">
+                            <p class="font-bold text-2xl">Correct!</p>
+                            <p class="text-xl">${container.dataset.expression} = ${correctAnswer}</p>
+                        </div>
+                    `;
+                    createConfetti();
+                } else {
+                    resultElement.innerHTML = `
+                        <div class="bg-red-800/50 p-4 rounded-lg">
+                            <p class="font-bold text-2xl">Incorrect</p>
+                            <p class="text-xl">${container.dataset.expression} = ${correctAnswer}</p>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                alert('Please enter a valid number as your answer');
+            }
+        }
+
+        function revealFastestSolution() {
+            const container = document.getElementById('expression-container');
+            const expression = container.dataset.expression;
+            const resultElement = document.getElementById('fastest-result');
+            
+            try {
+                const correctAnswer = eval(expression);
+                resultElement.classList.remove('hidden');
+                resultElement.textContent = `${expression} = ${correctAnswer}`;
+                resultElement.className = 'mt-4 text-xl font-bold text-purple-400';
+            } catch (e) {
+                alert('Invalid expression');
+            }
+        }
+
+        const puzzleQuestions = [
+            { question: "? + 5 = 11. What is the missing number?", answer: "6" },
+            { question: "Rearrange the numbers 3, 5, 7 to make the largest possible number", answer: "753" },
+            { question: "If 3 cats catch 3 mice in 3 minutes, how many cats would catch 100 mice in 100 minutes?", answer: "3" },
+            { question: "What is the next number: 1, 1, 2, 3, 5, 8, ...?", answer: "13" },
+            { question: "Using the numbers 2, 4, 6, and 8 exactly once with +, -, ×, ÷, make the largest possible result", answer: "8 × 6 × 4 × 2 = 384" }
+        ];
+
+        const mcqQuestions = [
+            {
+                question: "A straight line has ___ end points.",
+                options: ["0", "1", "2", "3", "4"],
+                answer: "2",
+                points: [20, 15, 10, 5],
+                times: [30, 20, 10, 10]
+            },
+            {
+                question: "What is the square root of 144?",
+                options: ["11", "12", "13", "14", "15"],
+                answer: "12",
+                points: [20, 15, 10, 5],
+                times: [30, 20, 10, 10]
+            },
+            {
+                question: "Which of these is a prime number?",
+                options: ["15", "21", "29", "33", "39"],
+                answer: "29",
+                points: [20, 15, 10, 5],
+                times: [30, 20, 10, 10]
+            },
+            {
+                question: "The total number of wheels in 5 bicycles is:",
+                options: ["5", "10", "15", "20", "25"],
+                answer: "10",
+                points: [20, 15, 10, 5],
+                times: [30, 20, 10, 10]
+            },
+            {
+                question: "If yesterday was Sunday, what day is tomorrow?",
+                options: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"],
+                answer: "Tuesday",
+                points: [20, 15, 10, 5],
+                times: [30, 20, 10, 10]
+            },
+            {
+                question: "Which one is the smallest even prime number?",
+                options: ["2", "4", "6", "8", "10"],
+                answer: "2",
+                points: [20, 15, 10, 5],
+                times: [30, 20, 10, 10]
+            },
+            {
+                question: "The smallest whole number is:",
+                options: ["0", "1", "2", "3", "4"],
+                answer: "0",
+                points: [20, 15, 10, 5],
+                times: [30, 20, 10, 10]
+            },
+            {
+                question: "Half an hour is equal to how many minutes?",
+                options: ["15", "30", "45", "60", "90"],
+                answer: "30",
+                points: [20, 15, 10, 5],
+                times: [30, 20, 10, 10]
+            }
+        ];
+
+        const targetProblems = [
+            { numbers: [3, 5, 7, 9], target: 24, solution: "3+5+7+9" },
+            { numbers: [1, 3, 5, 7], target: 2, solution: "1+3+5-7" },
+            { numbers: [8, 2, 6, 4], target: 14, solution: "8/2+6+4" },
+            { numbers: [2, 5, 7, 9], target: 8, solution: "2*5+7-9" }
+        ];
+
+        // Game State
+        let currentRound = null;
+        let usedQuestions = [];
+        let usedRelaySets = [];
+        let usedTargetProblems = [];
+        let relayCurrentSet = 0;
+        let relayCurrentQuestionInSet = 0;
+        let puzzleCurrentQuestion = 0;
+        let targetCurrentQuestion = 0;
+        let timerInterval = null;
+        let timerSeconds = 30;
+        let timerRunning = false;
+        let buzzerLocked = false;
+        let firstBuzzer = null;
+        let fallingElements = [];
+        let fallingInterval = null;
+
+        // DOM Elements
+        const roundContents = document.querySelectorAll('.round-content');
+        const questionGrid = document.getElementById('question-grid');
+        const questionGridContainer = questionGrid.querySelector('.grid');
+        const generalQuestionDisplay = document.getElementById('general-question');
+        const revealGeneralBtn = document.getElementById('reveal-general');
+        const relayQuestionDisplay = document.getElementById('relay-question');
+        const relayAnswerInput = document.getElementById('relay-answer');
+        const submitRelayBtn = document.getElementById('submit-relay');
+        const nextRelayBtn = document.getElementById('next-relay');
+        const revealRelayBtn = document.getElementById('reveal-relay');
+        const puzzleQuestionDisplay = document.getElementById('puzzle-question');
+        const nextPuzzleBtn = document.getElementById('next-puzzle');
+        const revealPuzzleBtn = document.getElementById('reveal-puzzle');
+        const expressionContainer = document.getElementById('expression-container');
+        const fastestQuestionDisplay = document.getElementById('fastest-question');
+        const startFallingBtn = document.getElementById('start-falling');
+        const buzzerSection = document.getElementById('buzzer-section');
+        const buzzerResult = document.getElementById('buzzer-result');
+        const revealFastestBtn = document.getElementById('reveal-fastest');
+        const markCorrectBtn = document.getElementById('mark-correct');
+        const markIncorrectBtn = document.getElementById('mark-incorrect');
+        const resetBuzzersBtn = document.getElementById('reset-buzzers');
+        const targetQuestionDisplay = document.getElementById('target-question');
+        const nextTargetBtn = document.getElementById('next-target');
+        const revealTargetBtn = document.getElementById('reveal-target');
+        const timerDisplay = document.getElementById('timer-display');
+        const timerCircle = document.getElementById('timer-circle');
+        const startTimerBtn = document.getElementById('start-timer');
+        const pauseTimerBtn = document.getElementById('pause-timer');
+        const resetTimerBtn = document.getElementById('reset-timer');
+        const scoreDisplays = {
+            red: document.getElementById('red-score'),
+            green: document.getElementById('green-score'),
+            yellow: document.getElementById('yellow-score'),
+            blue: document.getElementById('blue-score')
+        };
+        const buzzerButtons = {
+            red: document.getElementById('buzzer-red'),
+            green: document.getElementById('buzzer-green'),
+            yellow: document.getElementById('buzzer-yellow'),
+            blue: document.getElementById('buzzer-blue')
+        };
+
+        function createNumberGrid(gridId, count, clickHandler) {
+            const grid = document.getElementById(gridId);
+            grid.innerHTML = '';
+            for (let i = 1; i <= count; i++) {
+                const btn = document.createElement('button');
+                btn.className = 'bg-gray-700 hover:bg-gray-600 rounded text-center py-3 text-xl w-full';
+                btn.textContent = i;
+                btn.onclick = () => clickHandler(i - 1);
+                grid.appendChild(btn);
+            }
+        }
+
+        function updateGridButtons(gridId, currentIndex, usedIndices) {
+            const grid = document.getElementById(gridId);
+            if (!grid) return;
+            
+            Array.from(grid.children).forEach((btn, i) => {
+                if (currentIndex >= 0 && i === currentIndex) {
+                    btn.className = 'bg-green-600 hover:bg-green-700 rounded text-center py-3 text-xl w-full';
+                } else if (usedIndices.includes(i)) {
+                    btn.className = 'bg-red-600 hover:bg-red-700 rounded text-center py-3 text-xl w-full';
+                } else {
+                    btn.className = 'bg-gray-700 hover:bg-gray-600 rounded text-center py-3 text-xl w-full';
+                }
+            });
+        }
+
+        // MCQ Round
+        let mcqCurrentQuestion = 0;
+        let mcqAttemptCount = 0;
+        let usedMcqQuestions = [];
+
+        function showMcqQuestion(index) {
+            mcqCurrentQuestion = index;
+            mcqAttemptCount = 0;
+            setTimer(mcqQuestions[index].times[0]);
+            startTimer();
+            
+            const question = mcqQuestions[index];
+            document.getElementById('mcq-question').innerHTML = `
+                <p class="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-blue-400">Question ${index + 1}</p>
+                <p class="text-2xl text-center font-medium bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">${question.question}</p>
+                <p class="text-lg text-center text-gray-400 mt-2">Attempt ${mcqAttemptCount + 1}: ${question.times[mcqAttemptCount]} sec for ${question.points[mcqAttemptCount]} points</p>
+            `;
+            
+            const optionsContainer = document.getElementById('mcq-options');
+            optionsContainer.innerHTML = '';
+            optionsContainer.classList.remove('hidden');
+            
+            // Create first row with 2 options
+            // Create all options in a single row
+            question.options.forEach((option, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'bg-gray-700 hover:bg-gray-600 p-4 rounded-lg text-xl w-32';
+                btn.textContent = option;
+                optionsContainer.appendChild(btn);
+                
+                btn.onclick = () => {
+                    if (option === question.answer) {
+                        // Correct answer
+                        btn.className = 'bg-green-600 hover:bg-green-700 p-4 rounded-lg text-xl w-32';
+                        const points = question.points[mcqAttemptCount];
+                        document.getElementById('mcq-question').innerHTML += `
+                            <div class="mt-4 p-3 bg-green-800/50 rounded">
+                                <p class="font-bold">Correct! +${points} points</p>
+                            </div>
+                        `;
+                        updateScore('currentHouse', points);
+                        createConfetti();
+                        usedMcqQuestions.push(index);
+                        updateGridButtons('mcq-grid', -1, usedMcqQuestions);
+                    } else {
+                        // Incorrect answer
+                        btn.className = 'bg-red-600 hover:bg-red-700 p-4 rounded-lg text-xl w-32';
+                        btn.disabled = true;
+                        mcqAttemptCount++;
+                        
+                        // Update timer and points for next attempt
+                        if (mcqAttemptCount < question.times.length) {
+                            setTimer(question.times[mcqAttemptCount]);
+                            startTimer();
+                            document.getElementById('mcq-question').innerHTML += `
+                                <p class="text-lg text-center text-gray-400 mt-2">Attempt ${mcqAttemptCount + 1}: ${question.times[mcqAttemptCount]} sec for ${question.points[mcqAttemptCount]} points</p>
+                            `;
+                        }
+                        
+                        // Check if only correct answer remains
+                        const remainingOptions = Array.from(optionsContainer.children)
+                            .filter(opt => !opt.disabled && opt.textContent !== question.answer);
+                            
+                        if (remainingOptions.length === 0) {
+                            // Only correct answer left - show it automatically
+                            const correctBtn = Array.from(optionsContainer.children)
+                                .find(opt => opt.textContent === question.answer);
+                            correctBtn.className = 'bg-green-600 hover:bg-green-700 p-4 rounded-lg text-xl w-32';
+                            document.getElementById('mcq-question').innerHTML += `
+                                <div class="mt-4 p-3 bg-green-800/50 rounded">
+                                    <p class="font-bold">Correct answer revealed!</p>
+                                </div>
+                            `;
+                            usedMcqQuestions.push(index);
+                            updateGridButtons('mcq-grid', -1, usedMcqQuestions);
+                        }
+                    }
+                };
+            });
+            
+            updateGridButtons('mcq-grid', index, usedMcqQuestions);
+        }
+
+        function checkMcqAnswer() {
+            // This is now handled by the individual option buttons
+            createConfetti();
+            document.getElementById('mcq-question').innerHTML += `
+                <div class="mt-4 p-3 bg-green-800/50 rounded">
+                    <p class="font-bold">Correct! +10 points</p>
+                </div>
+            `;
+            usedMcqQuestions.push(mcqCurrentQuestion);
+            updateGridButtons('mcq-grid', -1, usedMcqQuestions);
+        }
+
+        function revealMcqAnswer() {
+            const question = mcqQuestions[mcqCurrentQuestion];
+            document.getElementById('mcq-question').innerHTML += `
+                <div class="mt-4 p-3 bg-gray-700 rounded">
+                    <p class="font-bold">Correct Answer:</p>
+                    <p>${question.answer}</p>
+                </div>
+            `;
+            usedMcqQuestions.push(mcqCurrentQuestion);
+            updateGridButtons('mcq-grid', -1, usedMcqQuestions);
+            
+            // Highlight correct option
+            const options = document.getElementById('mcq-options').querySelectorAll('button');
+            options.forEach(btn => {
+                if (btn.textContent === question.answer) {
+                    btn.className = 'bg-green-600 hover:bg-green-700 p-4 rounded-lg text-xl';
+                }
+                btn.disabled = true;
+            });
+        }
+
+        function nextMcqQuestion() {
+            // Find next unused question
+            let nextIndex = (mcqCurrentQuestion + 1) % mcqQuestions.length;
+            let attempts = 0;
+            
+            while (usedMcqQuestions.includes(nextIndex) && attempts < mcqQuestions.length) {
+                nextIndex = (nextIndex + 1) % mcqQuestions.length;
+                attempts++;
+            }
+            
+            if (attempts >= mcqQuestions.length) {
+                // All questions used, reset
+                usedMcqQuestions = [];
+                nextIndex = 0;
+            }
+            
+            showMcqQuestion(nextIndex);
+        }
+
+        // Initialize the app
+        function init() {
+            // Create question grids with proper styling
+            createNumberGrid('general-grid', 20, showGeneralQuestion);
+            createNumberGrid('relay-grid', 4, showRelayQuestion);
+            createNumberGrid('puzzle-grid', 8, showPuzzleQuestion);
+            createNumberGrid('fastest-grid', 8, showFastestQuestion);
+            createNumberGrid('target-grid', 4, showTargetQuestion);
+            createNumberGrid('mcq-grid', 8, showMcqQuestion);
+            
+            // Style all grid buttons consistently
+            document.querySelectorAll('#question-grid .grid button').forEach(btn => {
+                btn.className = 'bg-gray-700 hover:bg-gray-600 rounded text-center py-3 text-xl w-full';
+            });
+
+            // Set up event listeners
+            revealGeneralBtn.onclick = revealGeneralAnswer;
+            submitRelayBtn.onclick = checkRelayAnswer;
+            nextRelayBtn.onclick = nextRelayQuestion;
+            revealRelayBtn.onclick = revealRelayAnswer;
+            nextPuzzleBtn.onclick = nextPuzzle;
+            revealPuzzleBtn.onclick = revealPuzzleAnswer;
+            startFallingBtn.onclick = startFallingExpression;
+            revealFastestBtn.onclick = revealFastestAnswer;
+            markCorrectBtn.onclick = () => markBuzzerAnswer(true);
+            markIncorrectBtn.onclick = () => markBuzzerAnswer(false);
+            resetBuzzersBtn.onclick = resetBuzzers;
+            document.getElementById('submit-target').onclick = checkTargetAnswer;
+            document.getElementById('next-mcq').onclick = nextMcqQuestion;
+            document.getElementById('reveal-mcq').onclick = revealMcqAnswer;
+            nextTargetBtn.onclick = nextTargetProblem;
+            revealTargetBtn.onclick = revealTargetSolution;
+            startTimerBtn.onclick = startTimer;
+            pauseTimerBtn.onclick = pauseTimer;
+            resetTimerBtn.onclick = resetTimer;
+
+            // Buzzer buttons
+            buzzerButtons.red.onclick = () => buzzIn('red');
+            buzzerButtons.green.onclick = () => buzzIn('green');
+            buzzerButtons.yellow.onclick = () => buzzIn('yellow');
+            buzzerButtons.blue.onclick = () => buzzIn('blue');
+
+            // Keyboard shortcuts for buzzers
+            document.addEventListener('keydown', (e) => {
+                if (!buzzerSection.classList.contains('hidden') && !buzzerLocked) {
+                    switch (e.key.toUpperCase()) {
+                        case 'R': buzzIn('red'); break;
+                        case 'G': buzzIn('green'); break;
+                        case 'Y': buzzIn('yellow'); break;
+                        case 'B': buzzIn('blue'); break;
+                    }
+                }
+            });
+
+            // Show default round
+            showRound('general');
+        }
+
+        // Round Navigation
+        function showRound(round) {
+            currentRound = round;
+            roundContents.forEach(el => el.classList.add('hidden'));
+            document.getElementById(`${round}-round`).classList.remove('hidden');
+            
+            // Hide all grid containers
+            document.querySelectorAll('#question-grid > .grid').forEach(el => el.classList.add('hidden'));
+            
+            // Show the appropriate grid
+            if (round !== 'general') {
+                questionGrid.classList.remove('hidden');
+                document.getElementById(`${round}-grid`).classList.remove('hidden');
+            } else {
+                questionGrid.classList.remove('hidden');
+                document.getElementById('general-grid').classList.remove('hidden');
+            }
+        }
+
+        // General Round
+        function showGeneralQuestion(index) {
+            if (usedQuestions.includes(index)) return;
+            resetTimer(); // Reset timer completely
+            setTimer(30);
+            pauseTimer(); // Don't start automatically
+            
+            // Highlight current question in grid
+            const grid = document.getElementById('general-grid');
+            Array.from(grid.children).forEach((btn, i) => {
+                if (i === index) {
+                    btn.className = 'bg-green-600 hover:bg-green-700 rounded text-center py-3 text-xl';
+                } else if (usedQuestions.includes(i)) {
+                    btn.className = 'bg-red-600 hover:bg-red-700 rounded text-center py-3 text-xl';
+                } else {
+                    btn.className = 'bg-gray-700 hover:bg-gray-600 rounded text-center py-3 text-xl';
+                }
+            });
+            
+            generalQuestionDisplay.innerHTML = `
+                <p class="text-4xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400">Question ${index + 1}</p>
+                <p class="text-3xl text-center font-medium bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">${generalQuestions[index].question}</p>
+            `;
+            
+            document.getElementById('general-answer').value = '';
+            document.getElementById('general-answer').focus();
+            setTimer(30);
+            startTimer();
+            
+            // Connect submit and pass buttons
+            document.getElementById('submit-general').onclick = () => {
+                const index = parseInt(generalQuestionDisplay.textContent.match(/Question (\d+)/)[1]) - 1;
+                const userAnswer = document.getElementById('general-answer').value.trim();
+                pauseTimer(); // Stop timer when answering
+                if (userAnswer === generalQuestions[index].answer) {
+                    generalQuestionDisplay.innerHTML += `
+                        <div class="mt-4 p-3 bg-green-800/50 rounded">
+                            <p class="font-bold">Correct!</p>
+                        </div>
+                    `;
+                    createConfetti();
+                    usedQuestions.push(index);
+                } else {
+                    generalQuestionDisplay.innerHTML += `
+                        <div class="mt-4 p-3 bg-red-800/50 rounded">
+                            <p class="font-bold">Incorrect!</p>
+                        </div>
+                    `;
+                }
+            };
+            
+            document.getElementById('pass-general').onclick = handlePass;
+        }
+
+        function revealGeneralAnswer() {
+            const index = parseInt(generalQuestionDisplay.textContent.match(/Question (\d+)/)[1]) - 1;
+            generalQuestionDisplay.innerHTML += `
+                <div class="mt-4 p-3 bg-gray-700 rounded">
+                    <p class="font-bold">Answer:</p>
+                    <p>${generalQuestions[index].answer}</p>
+                </div>
+            `;
+            revealGeneralBtn.disabled = true;
+            setTimer(30);
+            
+            // Mark question as used
+            usedQuestions.push(index);
+            questionGridContainer.children[index].classList.add('question-used');
+        }
+
+        // Math Relay
+        function showRelayQuestion(index) {
+            relayCurrentSet = index;
+            relayCurrentQuestionInSet = 0;
+            setTimer(30);
+            startTimer(); // Start timer when showing new question
+            updateGridButtons('relay-grid', index, usedRelaySets);
+            showCurrentRelayQuestion();
+        }
+
+        function showCurrentRelayQuestion() {
+            const questionObj = relayQuestions[relayCurrentSet][relayCurrentQuestionInSet];
+            relayQuestionDisplay.innerHTML = `
+                <p class="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400">Set ${relayCurrentSet + 1}, Question ${relayCurrentQuestionInSet + 1}</p>
+                <p class="text-2xl text-center font-medium bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">${questionObj.question}</p>
+            `;
+            
+            relayAnswerInput.value = '';
+            relayAnswerInput.focus();
+            relayAnswerInput.disabled = false;
+            revealRelayBtn.disabled = false;
+            nextRelayBtn.disabled = true;
+            submitRelayBtn.disabled = false;
+            setTimer(20);
+            startTimer();
+        }
+
+        function nextRelayQuestion() {
+            relayCurrentQuestionInSet++;
+            if (relayCurrentQuestionInSet >= relayQuestions[relayCurrentSet].length) {
+                relayCurrentQuestionInSet = 0;
+            }
+            showCurrentRelayQuestion();
+        }
+
+        function checkRelayAnswer() {
+            const userAnswer = relayAnswerInput.value.trim();
+            const correctAnswer = relayQuestions[relayCurrentSet][relayCurrentQuestionInSet].answer;
+            
+            if (userAnswer === correctAnswer) {
+                relayQuestionDisplay.innerHTML += `
+                    <div class="mt-4 p-3 bg-green-800/50 rounded">
+                        <p class="font-bold">Correct!</p>
+                    </div>
+                `;
+                createConfetti();
+                // Enable next question button only after correct answer
+                nextRelayBtn.disabled = false;
+                submitRelayBtn.disabled = true;
+                relayAnswerInput.disabled = true;
+                
+                // Auto-advance after 2 seconds
+                setTimeout(() => {
+                    nextRelayQuestion();
+                }, 2000);
+            } else {
+                relayQuestionDisplay.innerHTML += `
+                    <div class="mt-4 p-3 bg-red-800/50 rounded">
+                        <p class="font-bold">Incorrect. Try again!</p>
+                    </div>
+                `;
+                relayAnswerInput.value = '';
+                relayAnswerInput.focus();
+            }
+        }
+
+        function revealRelayAnswer() {
+            relayQuestionDisplay.innerHTML += `
+                <div class="mt-4 p-3 bg-gray-700 rounded">
+                    <p class="font-bold">Answer:</p>
+                    <p>${relayQuestions[relayCurrentSet][relayCurrentQuestionInSet].answer}</p>
+                </div>
+            `;
+            revealRelayBtn.disabled = true;
+            setTimer(30);
+            // Auto-advance to next question after 2 seconds
+            setTimeout(() => {
+                nextRelayQuestion();
+            }, 2000);
+        }
+
+        // Number Puzzle
+        function showPuzzleQuestion(index) {
+            puzzleCurrentQuestion = index;
+            setTimer(30);
+            startTimer(); // Start timer when showing new question
+            puzzleQuestionDisplay.innerHTML = `
+                <p class="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-amber-400">Puzzle ${puzzleCurrentQuestion + 1}</p>
+                <p class="text-2xl text-center font-medium bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">${puzzleQuestions[puzzleCurrentQuestion].question}</p>
+            `;
+            revealPuzzleBtn.disabled = false;
+        }
+
+        function nextPuzzle() {
+            if (puzzleCurrentQuestion >= puzzleQuestions.length) {
+                puzzleCurrentQuestion = 0;
+            }
+            
+            puzzleQuestionDisplay.innerHTML = `
+                <p class="text-xl font-semibold mb-4">Puzzle ${puzzleCurrentQuestion + 1}</p>
+                <p class="text-lg">${puzzleQuestions[puzzleCurrentQuestion].question}</p>
+            `;
+            
+            revealPuzzleBtn.disabled = false;
+            puzzleCurrentQuestion++;
+        }
+
+        function revealPuzzleAnswer() {
+            puzzleQuestionDisplay.innerHTML += `
+                <div class="mt-4 p-3 bg-gray-700 rounded">
+                    <p class="font-bold">Answer:</p>
+                    <p>${puzzleQuestions[puzzleCurrentQuestion - 1].answer}</p>
+                </div>
+            `;
+            revealPuzzleBtn.disabled = true;
+            setTimer(30);
+        }
+
+        // Fastest Finger
+        function startFallingExpression() {
+            startFallingBtn.disabled = true;
+            expressionContainer.innerHTML = '';
+            fallingElements = [];
+            
+            // Generate a random expression (3-5 numbers with operators)
+            const numCount = 3 + Math.floor(Math.random() * 3);
+            const operators = ['+', '-', '×', '÷'];
+            let expressionParts = [];
+            
+            for (let i = 0; i < numCount; i++) {
+                const num = Math.floor(Math.random() * 10) + 1;
+                expressionParts.push(num.toString());
+                
+                if (i < numCount - 1) {
+                    const op = operators[Math.floor(Math.random() * operators.length)];
+                    expressionParts.push(op);
+                }
+            }
+            
+            // Store the full expression but don't show it yet
+            expressionContainer.dataset.fullExpression = expressionParts.join(' ');
+            
+            // Clear container and add all elements with animations
+            expressionContainer.innerHTML = '';
+            expressionParts.forEach((part, i) => {
+                const element = document.createElement('div');
+                element.className = 'falling-element text-4xl font-bold';
+                element.textContent = part;
+                element.style.animation = `fall 0.5s ease-out ${i * 0.5}s forwards`;
+                element.style.left = `${50 + (Math.random() * 20 - 10)}%`; // Random horizontal position
+                expressionContainer.appendChild(element);
+            });
+            
+            // Calculate total animation time
+            const totalTime = expressionParts.length * 0.5 + 0.5;
+            
+            setTimeout(() => {
+                startFallingBtn.disabled = false;
+                buzzerSection.classList.remove('hidden');
+                setTimer(30);
+                startTimer();
+                
+                // Store the expression for evaluation
+                const evalExpression = expressionParts.join('')
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/');
+                expressionContainer.dataset.expression = evalExpression;
+            }, totalTime * 1000);
+        }
+
+        function buzzIn(house) {
+            if (buzzerLocked) return;
+            
+            buzzerLocked = true;
+            firstBuzzer = house;
+            
+            // Highlight the buzzer
+            buzzerButtons[house].classList.add('buzzer-active');
+            
+            // Show which team buzzed first
+            buzzerResult.textContent = `Team ${house.toUpperCase()} buzzed first!`;
+            buzzerResult.className = `text-center font-bold text-xl mb-4 text-${house}-400`;
+            
+            // Pause the timer
+            pauseTimer();
+        }
+
+        function revealFastestAnswer() {
+            const index = parseInt(fastestQuestionDisplay.dataset.questionIndex);
+            const correctAnswer = fastestQuestions[index].answer;
+            buzzerResult.innerHTML += `
+                <div class="mt-2 p-2 bg-gray-700 rounded">
+                    <p class="font-bold">Answer:</p>
+                    <p>${correctAnswer}</p>
+                </div>
+            `;
+        }
+
+        function markBuzzerAnswer(correct) {
+            const index = parseInt(fastestQuestionDisplay.dataset.questionIndex);
+            const correctAnswer = fastestQuestions[index].answer;
+            const userAnswer = document.getElementById('fastest-answer').value.trim();
+            
+            if (userAnswer === correctAnswer) {
+                updateScore(firstBuzzer, 15);
+                createConfetti();
+                buzzerResult.innerHTML += `<div class="mt-2 p-2 bg-green-800/50 rounded">Correct! +15 points</div>`;
+            } else {
+                buzzerResult.innerHTML += `<div class="mt-2 p-2 bg-red-800/50 rounded">Incorrect! The answer was ${correctAnswer}</div>`;
+            }
+        }
+
+        function resetBuzzers() {
+            buzzerLocked = false;
+            firstBuzzer = null;
+            buzzerResult.textContent = '';
+            buzzerSection.classList.add('hidden');
+            
+            // Clear falling expressions
+            if (fallingInterval) {
+                clearInterval(fallingInterval);
+                fallingInterval = null;
+            }
+            document.querySelectorAll('.falling-expression').forEach(el => el.remove());
+            
+            // Reset buzzer buttons
+            Object.values(buzzerButtons).forEach(btn => {
+                btn.classList.remove('buzzer-active');
+            });
+        }
+
+        // Target Number
+        function showFastestQuestion(index) {
+            // Reset fastest finger round
+            resetBuzzers();
+            setTimer(30);
+            startTimer(); // Start timer when showing new question
+            document.getElementById('expression-container').innerHTML = '';
+            document.getElementById('fastest-result').classList.add('hidden');
+            
+            // Display the question
+            fastestQuestionDisplay.innerHTML = `
+                <p class="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-red-400 to-rose-400">Question ${index + 1}</p>
+            `;
+            
+            // Start falling expressions
+            showFallingExpression();
+            
+            // Set up event handlers
+            document.getElementById('submit-fastest').onclick = checkFastestAnswer;
+            document.getElementById('reveal-fastest').onclick = revealFastestSolution;
+            document.getElementById('next-fastest').onclick = showFallingExpression;
+        }
+
+        function startFallingExpressions() {
+            // Clear any existing intervals
+            if (fallingInterval) clearInterval(fallingInterval);
+            
+            // Generate random math expressions that fall down
+            fallingInterval = setInterval(() => {
+                if (buzzerLocked) return; // Stop if someone buzzed in
+                
+                const operators = ['+', '-', '×', '÷'];
+                const num1 = Math.floor(Math.random() * 10) + 1;
+                const num2 = Math.floor(Math.random() * 10) + 1;
+                const operator = operators[Math.floor(Math.random() * operators.length)];
+                const expression = `${num1} ${operator} ${num2}`;
+                
+                // Create falling element
+                const element = document.createElement('div');
+                element.className = 'falling-expression text-3xl font-bold';
+                element.textContent = expression;
+                
+                // Random horizontal position
+                const leftPos = 10 + Math.random() * 80;
+                element.style.left = `${leftPos}%`;
+                element.style.top = '-50px';
+                element.style.opacity = '1';
+                element.style.color = `hsl(${Math.random() * 360}, 100%, 70%)`;
+                element.style.textShadow = '0 0 10px currentColor';
+                
+                // Calculate answer and store in dataset
+                try {
+                    const evalExpr = expression.replace('×', '*').replace('÷', '/');
+                    element.dataset.answer = eval(evalExpr);
+                } catch {
+                    element.dataset.answer = '?';
+                }
+                
+                expressionContainer.appendChild(element);
+                
+                // Animate falling
+                const duration = 3000 + Math.random() * 2000; // 3-5 seconds
+                const startTime = performance.now();
+                
+                function animate(currentTime) {
+                    if (buzzerLocked) return;
+                    
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const pos = progress * (expressionContainer.offsetHeight + 50);
+                    element.style.top = `${pos}px`;
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        element.style.opacity = '0';
+                        setTimeout(() => element.remove(), 500);
+                    }
+                }
+                
+                requestAnimationFrame(animate);
+                
+            }, 1500); // New expression every 1.5 seconds
+        }
+
+        function showTargetQuestion(index) {
+            targetCurrentQuestion = index;
+            setTimer(30); // 30 seconds for target problems
+            startTimer();
+            updateGridButtons('target-grid', index, usedTargetProblems);
+            const problem = targetProblems[targetCurrentQuestion];
+            targetQuestionDisplay.innerHTML = `
+                <p class="text-3xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-fuchsia-400">Target Challenge ${targetCurrentQuestion + 1}</p>
+                <div class="flex justify-center items-center gap-4 mb-4">
+                    ${problem.numbers.map(num => `<span class="text-3xl font-bold bg-gray-700 px-4 py-2 rounded">${num}</span>`).join('')}
+                </div>
+                <p class="text-center text-lg">Target: <span class="font-bold text-2xl">${problem.target}</span></p>
+            `;
+            document.getElementById('target-answer').value = '';
+            revealTargetBtn.disabled = false;
+            nextTargetBtn.disabled = true;
+        }
+
+        function nextTargetProblem() {
+            // Find next unused question
+            let nextIndex = (targetCurrentQuestion + 1) % targetProblems.length;
+            let attempts = 0;
+            
+            while (usedTargetProblems.includes(nextIndex) && attempts < targetProblems.length) {
+                nextIndex = (nextIndex + 1) % targetProblems.length;
+                attempts++;
+            }
+            
+            if (attempts >= targetProblems.length) {
+                // All questions used, reset
+                usedTargetProblems = [];
+                nextIndex = 0;
+            }
+            
+            targetCurrentQuestion = nextIndex;
+            showTargetQuestion(targetCurrentQuestion);
+        }
+
+        function checkTargetAnswer() {
+            const problem = targetProblems[targetCurrentQuestion];
+            const userAnswer = document.getElementById('target-answer').value.trim();
+            
+            try {
+                // Evaluate user's solution
+                const userResult = eval(userAnswer.replace(/×/g, '*').replace(/÷/g, '/'));
+                const correctResult = eval(problem.solution);
+                
+                if (Math.abs(userResult - correctResult) < 0.01) {
+                    targetQuestionDisplay.innerHTML += `
+                        <div class="mt-4 p-3 bg-green-800/50 rounded">
+                            <p class="font-bold">Correct! +20 points</p>
+                        </div>
+                    `;
+                    createConfetti();
+                    if (!usedTargetProblems.includes(targetCurrentQuestion)) {
+                        usedTargetProblems.push(targetCurrentQuestion);
+                        updateGridButtons('target-grid', -1, usedTargetProblems);
+                    }
+                    nextTargetBtn.disabled = false;
+                } else {
+                    targetQuestionDisplay.innerHTML += `
+                        <div class="mt-4 p-3 bg-red-800/50 rounded">
+                            <p class="font-bold">Incorrect! Your solution equals ${userResult}</p>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                targetQuestionDisplay.innerHTML += `
+                    <div class="mt-4 p-3 bg-red-800/50 rounded">
+                        <p class="font-bold">Invalid expression</p>
+                    </div>
+                `;
+            }
+        }
+
+        function revealTargetSolution() {
+            const problem = targetProblems[targetCurrentQuestion];
+            targetQuestionDisplay.innerHTML += `
+                <div class="mt-4 p-3 bg-gray-700 rounded">
+                    <p class="font-bold">Solution:</p>
+                    <p>${problem.numbers.join(', ')} → ${problem.target} = ${problem.solution}</p>
+                </div>
+            `;
+            revealTargetBtn.disabled = true;
+            nextTargetBtn.disabled = false;
+            setTimer(30);
+            
+            if (!usedTargetProblems.includes(targetCurrentQuestion)) {
+                usedTargetProblems.push(targetCurrentQuestion);
+                updateGridButtons('target-grid', -1, usedTargetProblems);
+            }
+        }
+
+        let passCount = 0;
+        const passTimes = [20, 10, 10];
+
+        function handlePass() {
+            pauseTimer(); // Stop current timer
+            if (passCount < passTimes.length) {
+                setTimer(passTimes[passCount]);
+                startTimer();
+                passCount++;
+            } else {
+                setTimer(10);
+                startTimer();
+            }
+            // Update UI to show pass count
+            document.getElementById('pass-count').textContent = `Passes used: ${passCount}/3`;
+        }
+
+        // Timer Functions
+        function setTimer(seconds) {
+            passCount = 0;
+            timerSeconds = seconds;
+            timerDisplay.textContent = seconds;
+            const offset = 283 * (1 - seconds / 30);
+            timerCircle.style.strokeDashoffset = offset;
+            
+            // Automatically pause if set to 30 seconds
+            if (seconds === 30) {
+                pauseTimer();
+            }
+        }
+
+        function startTimer() {
+            if (timerRunning) return;
+            timerRunning = true;
+            
+            timerInterval = setInterval(() => {
+                timerSeconds--;
+                timerDisplay.textContent = timerSeconds;
+                const offset = 283 * (1 - timerSeconds / 30);
+                timerCircle.style.strokeDashoffset = offset;
+                
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    timerRunning = false;
+                    
+                    // Show time's up message based on current round
+                    if (currentRound === 'general') {
+                        generalQuestionDisplay.innerHTML += `
+                            <div class="mt-4 p-3 bg-red-800/50 rounded">
+                                <p class="font-bold">Time's Up!</p>
+                            </div>
+                        `;
+                    } else if (currentRound === 'relay') {
+                        relayQuestionDisplay.innerHTML += `
+                            <div class="mt-4 p-3 bg-red-800/50 rounded">
+                                <p class="font-bold">Time's Up!</p>
+                            </div>
+                        `;
+                    } else if (currentRound === 'fastest') {
+                        document.getElementById('fastest-result').innerHTML = `
+                            <div class="mt-4 p-3 bg-red-800/50 rounded">
+                                <p class="font-bold">Time's Up!</p>
+                            </div>
+                        `;
+                        document.getElementById('fastest-result').classList.remove('hidden');
+                    } else if (currentRound === 'target') {
+                        targetQuestionDisplay.innerHTML += `
+                            <div class="mt-4 p-3 bg-red-800/50 rounded">
+                                <p class="font-bold">Time's Up!</p>
+                            </div>
+                        `;
+                    }
+                }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+        }
+
+        function resetTimer() {
+            pauseTimer();
+            passCount = 0; // Reset pass count
+            document.getElementById('pass-count').textContent = 'Passes used: 0/3';
+            setTimer(30);
+            
+            // Clear any time's up messages
+            if (currentRound === 'general') {
+                const timeUpMsg = generalQuestionDisplay.querySelector('.bg-red-800\\/50');
+                if (timeUpMsg) timeUpMsg.remove();
+            } else if (currentRound === 'relay') {
+                const timeUpMsg = relayQuestionDisplay.querySelector('.bg-red-800\\/50');
+                if (timeUpMsg) timeUpMsg.remove();
+            } else if (currentRound === 'fastest') {
+                const fastestResult = document.getElementById('fastest-result');
+                if (fastestResult.textContent.includes("Time's Up")) {
+                    fastestResult.innerHTML = '';
+                    fastestResult.classList.add('hidden');
+                }
+            } else if (currentRound === 'target') {
+                const timeUpMsg = targetQuestionDisplay.querySelector('.bg-red-800\\/50');
+                if (timeUpMsg) timeUpMsg.remove();
+            }
+        }
+
+        // Scoreboard
+        const scores = {
+            red: 0,
+            green: 0,
+            yellow: 0,
+            blue: 0
+        };
+
+        function updateScore(house, points) {
+            scores[house] += points;
+            scoreDisplays[house].textContent = scores[house];
+            
+            // Add animation
+            scoreDisplays[house].classList.add('animate-pulse');
+            setTimeout(() => {
+                scoreDisplays[house].classList.remove('animate-pulse');
+            }, 500);
+            
+            // Sort scoreboard
+            sortScoreboard();
+            
+            // Reset timer
+            setTimer(30);
+        }
+
+        function sortScoreboard() {
+            const container = document.getElementById('scoreboard-container');
+            const houses = Array.from(container.children);
+            
+            houses.sort((a, b) => {
+                const aScore = parseInt(document.getElementById(`${a.dataset.house}-score`).textContent);
+                const bScore = parseInt(document.getElementById(`${b.dataset.house}-score`).textContent);
+                return bScore - aScore;
+            });
+            
+            // Reattach sorted elements
+            houses.forEach(house => container.appendChild(house));
+        }
+
+        // Confetti Effect
+        function createConfetti() {
+            const container = document.querySelector('body');
+            const colors = ['#f00', '#0f0', '#ff0', '#00f', '#f0f', '#0ff'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                container.appendChild(confetti);
+                
+                setTimeout(() => {
+                    confetti.classList.add('confetti-animate');
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, 0);
+            }
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
